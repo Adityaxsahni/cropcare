@@ -11,7 +11,7 @@ All commands run from this `ml/` folder. Data lives in `../data/` (git-ignored).
 ## 0. Set up (Colab or Kaggle, GPU runtime)
 
 ```bash
-git clone <your repo url> cropcare
+git clone https://github.com/Adityaxsahni/cropcare.git
 cd cropcare/ml
 pip install -r requirements.txt
 ```
