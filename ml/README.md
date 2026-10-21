@@ -2,7 +2,7 @@
 
 Every script prints what it did and writes its numbers to files. Fill `results.md` only from those files.
 
-**Easiest way:** open [`CropCare_Colab.ipynb`](CropCare_Colab.ipynb) in Google Colab (File > Open notebook > GitHub, or upload it) and run it top to bottom. It runs every step below, saves models and results to your Google Drive so a disconnect loses nothing, refuses to test a second model on the field photos, picks the TFLite file by the "at most 2 points lost" rule, and prints the rows for `results.md`. The setup it needs is listed in its first cell.
+**Easiest way:** open [`CropCare_Colab.ipynb`](https://colab.research.google.com/github/Adityaxsahni/cropcare/blob/main/ml/CropCare_Colab.ipynb) in Google Colab and run it top to bottom. It runs every step below, saves models and results to your Google Drive so a disconnect loses nothing, refuses to test a second model on the field photos, picks the TFLite file by the "at most 2 points lost" rule, and prints the rows for `results.md`. The setup it needs is listed in its first cell.
 
 The rest of this page is the same pipeline as plain commands, for running anywhere else.
 
