@@ -1,0 +1,66 @@
+{
+  "labels": [
+    "tomato_bacterial_spot",
+    "tomato_early_blight",
+    "tomato_late_blight",
+    "tomato_leaf_mold",
+    "tomato_septoria_leaf_spot",
+    "tomato_yellow_leaf_curl_virus",
+    "tomato_healthy",
+    "potato_early_blight",
+    "potato_late_blight",
+    "potato_healthy",
+    "maize_common_rust",
+    "maize_northern_leaf_blight",
+    "maize_gray_leaf_spot",
+    "maize_healthy"
+  ],
+  "plantvillage": {
+    "Tomato___Bacterial_spot": "tomato_bacterial_spot",
+    "Tomato___Early_blight": "tomato_early_blight",
+    "Tomato___Late_blight": "tomato_late_blight",
+    "Tomato___Leaf_Mold": "tomato_leaf_mold",
+    "Tomato___Septoria_leaf_spot": "tomato_septoria_leaf_spot",
+    "Tomato___Tomato_Yellow_Leaf_Curl_Virus": "tomato_yellow_leaf_curl_virus",
+    "Tomato___healthy": "tomato_healthy",
+    "Potato___Early_blight": "potato_early_blight",
+    "Potato___Late_blight": "potato_late_blight",
+    "Potato___healthy": "potato_healthy",
+    "Corn___Common_rust": "maize_common_rust",
+    "Corn___Northern_Leaf_Blight": "maize_northern_leaf_blight",
+    "Corn___Cercospora_leaf_spot Gray_leaf_spot": "maize_gray_leaf_spot",
+    "Corn___healthy": "maize_healthy",
+    "Corn_(maize)___Common_rust_": "maize_common_rust",
+    "Corn_(maize)___Northern_Leaf_Blight": "maize_northern_leaf_blight",
+    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": "maize_gray_leaf_spot",
+    "Corn_(maize)___healthy": "maize_healthy"
+  },
+  "plantvillage_excluded": [
+    "Tomato___Spider_mites Two-spotted_spider_mite",
+    "Tomato___Target_Spot",
+    "Tomato___Tomato_mosaic_virus"
+  ],
+  "plantdoc": {
+    "Tomato leaf bacterial spot": "tomato_bacterial_spot",
+    "Tomato Early blight leaf": "tomato_early_blight",
+    "Tomato leaf late blight": "tomato_late_blight",
+    "Tomato mold leaf": "tomato_leaf_mold",
+    "Tomato Septoria leaf spot": "tomato_septoria_leaf_spot",
+    "Tomato leaf yellow virus": "tomato_yellow_leaf_curl_virus",
+    "Tomato leaf": "tomato_healthy",
+    "Potato leaf early blight": "potato_early_blight",
+    "Potato leaf late blight": "potato_late_blight",
+    "Corn rust leaf": "maize_common_rust",
+    "Corn leaf blight": "maize_northern_leaf_blight",
+    "Corn Gray leaf spot": "maize_gray_leaf_spot"
+  },
+  "plantdoc_excluded": [
+    "Tomato leaf mosaic virus",
+    "Tomato two spotted spider mites leaf"
+  ],
+  "crop_prefixes": {
+    "plantvillage": ["Tomato", "Potato", "Corn"],
+    "plantdoc": ["Tomato", "Potato", "Corn"]
+  },
+  "notes": "PlantDoc has no healthy potato and no healthy corn folder (checked 2026-10-22). See docs/DECISIONS.md ADR-002. PlantVillage folder names differ between TFDS (Corn___) and the Kaggle copy (Corn_(maize)___); both are listed."
+}

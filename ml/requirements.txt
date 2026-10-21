@@ -1,0 +1,8 @@
+# Training and conversion (Colab or Kaggle, Python 3.10 to 3.12)
+tensorflow>=2.16,<2.21
+numpy>=2.0
+pillow>=10.0
+ai-edge-litert>=2.0  # LiteRT runtime for checking and evaluating .tflite files
+
+# Tests (run anywhere, TensorFlow not needed)
+pytest>=8.0

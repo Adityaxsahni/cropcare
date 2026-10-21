@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CropCare: leaf disease check for farmers in Bihar</title>
+  <meta name="description" content="An offline Android app that checks tomato, potato and maize leaves for 14 common conditions from one photo, with treatment steps in Hindi and English.">
+  <link rel="icon" href="favicon.ico" sizes="32x32">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="favicon.svg" alt="" width="32" height="32">CropCare</a>
+      <nav aria-label="Main">
+        <ul>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#covers">What it checks</a></li>
+          <li><a href="#testing">How we test it</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>Check a crop leaf for disease from one photo, without internet</h1>
+    <p class="lead">CropCare is an Android app for farmers in Bihar. Point the camera at a tomato, potato or maize leaf, and it suggests which of 14 common conditions the leaf shows and what to do next, in Hindi or English.</p>
+    <p class="hi" lang="hi">टमाटर, आलू और मक्का की पत्ती की एक फोटो लें। क्रॉपकेयर बताता है कि पत्ती में कौन सा रोग हो सकता है और क्या करें। बिना इंटरनेट के काम करता है।</p>
+
+    <div class="status">
+      <p><strong>Status: in development.</strong> The app is not yet available to download. It will first be tested with a small group of farmers, after an agriculture expert has checked the treatment advice.</p>
+    </div>
+
+    <h2 id="how">How it works</h2>
+    <ol class="steps">
+      <li>Open the app and place one leaf inside the box on the camera screen.</li>
+      <li>The app checks the photo on the phone itself. Nothing is uploaded, so it works in the field with no signal.</li>
+      <li>You see the likely condition, how sure the app is, and simple steps to take. A button reads the steps aloud in Hindi.</li>
+      <li>If the app is not sure, it says so and asks for a clearer photo instead of guessing.</li>
+    </ol>
+    <p>The app is a first check, not a diagnosis. For serious cases it points farmers to their nearest Krishi Vigyan Kendra (KVK).</p>
+
+    <h2 id="covers">What it checks</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th scope="col">Crop</th><th scope="col">Conditions</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Tomato <span lang="hi">(टमाटर)</span></td><td>Bacterial spot, early blight, late blight, leaf mold, Septoria leaf spot, yellow leaf curl virus, healthy</td></tr>
+          <tr><td>Potato <span lang="hi">(आलू)</span></td><td>Early blight, late blight, healthy</td></tr>
+          <tr><td>Maize <span lang="hi">(मक्का)</span></td><td>Common rust, northern leaf blight, gray leaf spot, healthy</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Rice and wheat matter more in Bihar, but public photo sets of their diseases taken in real fields are still small. They are planned for a later version.</p>
+
+    <h2 id="testing">How we test it</h2>
+    <p>Many crop disease models report very high accuracy on lab photos of single leaves on plain backgrounds, then do much worse on photos taken in a field. CropCare is measured on three separate sets of photos:</p>
+    <ul>
+      <li><strong>PlantVillage</strong>: lab photos, used for training.</li>
+      <li><strong>PlantDoc</strong>: real-world photos from the internet, with its own test split.</li>
+      <li><strong>Our own field photos</strong>: taken on farms near us and labelled by people who know the diseases. These are used only once, for the final test, and never for training.</li>
+    </ul>
+    <p>Results will be published here with the size of each test set and the margin of error. Until they are measured, we do not publish any accuracy figure.</p>
+
+    <h2>Treatment advice</h2>
+    <p>The treatment steps in the app are written in plain Hindi and English. Before the app reaches farmers, every step will be checked by an agriculture expert, and the expert's name will be shown in the app. The app never gives pesticide doses from its own text; it asks farmers to follow the product label and their KVK.</p>
+
+    <h2>Privacy</h2>
+    <p>Photos never leave the phone. If a farmer agrees, the app can send anonymous results (the condition found, how sure it was, and whether the farmer said it was correct) when the phone is online. It never sends names, phone numbers, photos or locations. <a href="privacy.html">Read the privacy policy</a>.</p>
+  </main>
+
+  <footer class="site">
+    <div class="wrap">
+      <ul>
+        <li>CropCare, a student project</li>
+        <li><a href="privacy.html">Privacy policy</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,334 @@
+{
+  "version": 0,
+  "review": {
+    "reviewed": false,
+    "reviewer": "",
+    "date": "",
+    "notes": "DRAFT. Written from general extension practice for these diseases. Not yet checked against ICAR, Bihar Agriculture Department or KVK material, and not yet reviewed by an agriculture expert. No doses are given on purpose: doses must come from the product label or the reviewing expert. When an expert has checked every entry, set reviewed to true, fill reviewer and date, and list the documents used in sources."
+  },
+  "sources": [],
+  "classes": {
+    "tomato_bacterial_spot": {
+      "crop": "tomato",
+      "healthy": false,
+      "en": {
+        "name": "Tomato: Bacterial spot",
+        "steps": [
+          "Pick off leaves with spots and destroy them away from the field. Do not put them in compost.",
+          "Water at the base of the plant, not over the leaves, so the leaves stay dry.",
+          "Do not work among the plants while they are wet. The bacteria spread on hands and tools.",
+          "If spots keep spreading, ask your KVK whether a copper-based spray suits your crop, and which product and dose to use. Follow the label.",
+          "Next season, use healthy seed or seedlings and do not grow tomato or chilli in the same place."
+        ]
+      },
+      "hi": {
+        "name": "टमाटर: जीवाणु धब्बा रोग",
+        "steps": [
+          "धब्बे वाली पत्तियाँ तोड़कर खेत से दूर नष्ट करें। इन्हें खाद के गड्ढे में न डालें।",
+          "पानी पौधे की जड़ के पास दें, पत्तियों के ऊपर नहीं, ताकि पत्तियाँ सूखी रहें।",
+          "पौधे गीले हों तब उनके बीच काम न करें। जीवाणु हाथों और औज़ारों से फैलते हैं।",
+          "अगर धब्बे फैलते रहें, तो अपने KVK से पूछें कि क्या तांबा (कॉपर) वाली दवा आपकी फसल के लिए ठीक है, और कौन सी दवा कितनी मात्रा में डालें। लेबल पर लिखे निर्देश मानें।",
+          "अगले मौसम में स्वस्थ बीज या पौध लगाएँ और उसी जगह टमाटर या मिर्च न लगाएँ।"
+        ]
+      }
+    },
+    "tomato_early_blight": {
+      "crop": "tomato",
+      "healthy": false,
+      "en": {
+        "name": "Tomato: Early blight",
+        "steps": [
+          "Remove the lower leaves that have brown spots with rings, and destroy them away from the field.",
+          "Water at the base of the plant in the morning so the leaves dry during the day.",
+          "Leave space between plants so air can move. Keep the field free of weeds.",
+          "If the disease spreads, a fungicide may be needed. Ask your KVK which product and dose to use, and follow the label.",
+          "Next season, do not grow tomato, potato or brinjal in the same field."
+        ]
+      },
+      "hi": {
+        "name": "टमाटर: अगेती झुलसा",
+        "steps": [
+          "नीचे की वे पत्तियाँ हटाएँ जिन पर छल्लेदार भूरे धब्बे हैं, और उन्हें खेत से दूर नष्ट करें।",
+          "पानी सुबह के समय जड़ के पास दें, ताकि दिन में पत्तियाँ सूख जाएँ।",
+          "पौधों के बीच दूरी रखें ताकि हवा चल सके। खेत को खरपतवार से साफ रखें।",
+          "अगर रोग फैले तो फफूंदनाशक दवा की ज़रूरत हो सकती है। अपने KVK से पूछें कि कौन सी दवा कितनी मात्रा में डालें, और लेबल पर लिखे निर्देश मानें।",
+          "अगले मौसम में उसी खेत में टमाटर, आलू या बैंगन न लगाएँ।"
+        ]
+      }
+    },
+    "tomato_late_blight": {
+      "crop": "tomato",
+      "healthy": false,
+      "en": {
+        "name": "Tomato: Late blight",
+        "steps": [
+          "Act quickly. Late blight spreads fast in cool, damp or foggy weather and can kill a field in days.",
+          "Pull out badly affected plants and destroy them away from the field. Do not compost them.",
+          "Water at the base of the plant, not over the leaves.",
+          "Contact your KVK the same day. A fungicide recommended for late blight is usually needed. Ask which product and dose to use, and follow the label.",
+          "Tell nearby farmers. Check potato fields close by, because the same disease attacks potato."
+        ]
+      },
+      "hi": {
+        "name": "टमाटर: पछेती झुलसा",
+        "steps": [
+          "जल्दी कदम उठाएँ। ठंडे, नम या कोहरे वाले मौसम में पछेती झुलसा तेज़ी से फैलता है और कुछ ही दिनों में पूरा खेत खराब कर सकता है।",
+          "ज़्यादा प्रभावित पौधे उखाड़कर खेत से दूर नष्ट करें। इन्हें खाद में न डालें।",
+          "पानी जड़ के पास दें, पत्तियों के ऊपर नहीं।",
+          "उसी दिन अपने KVK से संपर्क करें। आमतौर पर पछेती झुलसा के लिए बताई गई फफूंदनाशक दवा की ज़रूरत होती है। पूछें कि कौन सी दवा कितनी मात्रा में डालें, और लेबल पर लिखे निर्देश मानें।",
+          "पास के किसानों को बताएँ। पास के आलू के खेत भी जाँचें, क्योंकि यही रोग आलू पर भी लगता है।"
+        ]
+      }
+    },
+    "tomato_leaf_mold": {
+      "crop": "tomato",
+      "healthy": false,
+      "en": {
+        "name": "Tomato: Leaf mold",
+        "steps": [
+          "Leaf mold likes still, humid air. Open up the crop: remove some lower leaves and give plants more space.",
+          "If plants are under a net or polyhouse, open the sides during the day to let air through.",
+          "Remove leaves with yellow patches on top and olive-green mould underneath, and destroy them.",
+          "Water at the base of the plant in the morning.",
+          "If it keeps spreading, ask your KVK whether a fungicide is needed, and which product and dose to use."
+        ]
+      },
+      "hi": {
+        "name": "टमाटर: पत्ती फफूंद",
+        "steps": [
+          "यह रोग रुकी हुई, नम हवा में बढ़ता है। फसल को खुला रखें: नीचे की कुछ पत्तियाँ हटाएँ और पौधों के बीच ज़्यादा जगह दें।",
+          "अगर पौधे जाली या पॉलीहाउस में हैं, तो दिन में किनारे खोल दें ताकि हवा आर-पार जा सके।",
+          "जिन पत्तियों के ऊपर पीले धब्बे और नीचे जैतूनी हरी फफूंद है, उन्हें हटाकर नष्ट करें।",
+          "पानी सुबह के समय जड़ के पास दें।",
+          "अगर रोग फैलता रहे, तो अपने KVK से पूछें कि क्या फफूंदनाशक दवा चाहिए, और कौन सी दवा कितनी मात्रा में डालें।"
+        ]
+      }
+    },
+    "tomato_septoria_leaf_spot": {
+      "crop": "tomato",
+      "healthy": false,
+      "en": {
+        "name": "Tomato: Septoria leaf spot",
+        "steps": [
+          "Remove the lower leaves with many small round spots that have grey centres, and destroy them away from the field.",
+          "Spread straw or dry grass under the plants so soil does not splash onto the leaves.",
+          "Water at the base of the plant, not over the leaves.",
+          "If the disease moves up the plant, ask your KVK which fungicide and dose to use, and follow the label.",
+          "After harvest, remove and destroy old plants. Do not grow tomato in the same place next season."
+        ]
+      },
+      "hi": {
+        "name": "टमाटर: सेप्टोरिया पत्ती धब्बा",
+        "steps": [
+          "नीचे की वे पत्तियाँ हटाएँ जिन पर बीच में धूसर रंग वाले कई छोटे गोल धब्बे हैं, और उन्हें खेत से दूर नष्ट करें।",
+          "पौधों के नीचे पुआल या सूखी घास बिछाएँ ताकि मिट्टी उछलकर पत्तियों पर न लगे।",
+          "पानी जड़ के पास दें, पत्तियों के ऊपर नहीं।",
+          "अगर रोग पौधे में ऊपर की ओर बढ़े, तो अपने KVK से पूछें कि कौन सी फफूंदनाशक दवा कितनी मात्रा में डालें, और लेबल पर लिखे निर्देश मानें।",
+          "फसल के बाद पुराने पौधे हटाकर नष्ट करें। अगले मौसम में उसी जगह टमाटर न लगाएँ।"
+        ]
+      }
+    },
+    "tomato_yellow_leaf_curl_virus": {
+      "crop": "tomato",
+      "healthy": false,
+      "en": {
+        "name": "Tomato: Yellow leaf curl virus",
+        "steps": [
+          "This is a virus. No spray cures an infected plant.",
+          "Pull out infected plants early, put them in a bag and destroy them, so they do not spread the virus.",
+          "The virus is carried by whitefly. Hang yellow sticky traps in the field to catch whitefly.",
+          "Ask your KVK how to control whitefly in your area, and which product and dose to use if a spray is needed.",
+          "Next season, ask your KVK for a variety that resists leaf curl, and raise seedlings under fine net."
+        ]
+      },
+      "hi": {
+        "name": "टमाटर: पत्ती मोड़ (लीफ कर्ल) विषाणु रोग",
+        "steps": [
+          "यह विषाणु (वायरस) रोग है। कोई भी दवा रोगी पौधे को ठीक नहीं कर सकती।",
+          "रोगी पौधे जल्दी उखाड़ें, थैले में बंद करके नष्ट करें, ताकि वायरस आगे न फैले।",
+          "यह वायरस सफेद मक्खी से फैलता है। सफेद मक्खी पकड़ने के लिए खेत में पीले चिपचिपे ट्रैप लगाएँ।",
+          "अपने KVK से पूछें कि आपके इलाके में सफेद मक्खी को कैसे रोकें, और अगर दवा चाहिए तो कौन सी दवा कितनी मात्रा में डालें।",
+          "अगले मौसम में KVK से लीफ कर्ल रोधी किस्म के बारे में पूछें, और पौध महीन जाली के नीचे तैयार करें।"
+        ]
+      }
+    },
+    "tomato_healthy": {
+      "crop": "tomato",
+      "healthy": true,
+      "en": {
+        "name": "Tomato: Healthy leaf",
+        "steps": [
+          "No disease was found on this leaf.",
+          "Check your plants once a week, including the lower leaves and the underside of leaves.",
+          "If you see spots, yellowing or curling, check again with the app or show a leaf at your KVK."
+        ]
+      },
+      "hi": {
+        "name": "टमाटर: स्वस्थ पत्ती",
+        "steps": [
+          "इस पत्ती पर कोई रोग नहीं मिला।",
+          "हफ़्ते में एक बार पौधों को जाँचें, नीचे की पत्तियाँ और पत्तियों का निचला हिस्सा भी देखें।",
+          "अगर धब्बे, पीलापन या पत्तियों का मुड़ना दिखे, तो ऐप से फिर जाँचें या पत्ती अपने KVK पर दिखाएँ।"
+        ]
+      }
+    },
+    "potato_early_blight": {
+      "crop": "potato",
+      "healthy": false,
+      "en": {
+        "name": "Potato: Early blight",
+        "steps": [
+          "Remove leaves with brown spots that have rings, and destroy them away from the field.",
+          "Give the crop balanced fertiliser. Weak, hungry plants get early blight more easily. Ask your KVK what your soil needs.",
+          "Water the field evenly. Avoid long dry spells followed by heavy watering.",
+          "If the disease spreads, ask your KVK which fungicide and dose to use, and follow the label.",
+          "Next season, do not grow potato, tomato or brinjal in the same field."
+        ]
+      },
+      "hi": {
+        "name": "आलू: अगेती झुलसा",
+        "steps": [
+          "छल्लेदार भूरे धब्बे वाली पत्तियाँ हटाएँ और उन्हें खेत से दूर नष्ट करें।",
+          "फसल को संतुलित खाद दें। कमज़ोर पौधों पर अगेती झुलसा जल्दी लगता है। अपने KVK से पूछें कि आपकी मिट्टी को क्या चाहिए।",
+          "खेत में बराबर सिंचाई करें। लंबे सूखे के बाद एकदम ज़्यादा पानी देने से बचें।",
+          "अगर रोग फैले, तो अपने KVK से पूछें कि कौन सी फफूंदनाशक दवा कितनी मात्रा में डालें, और लेबल पर लिखे निर्देश मानें।",
+          "अगले मौसम में उसी खेत में आलू, टमाटर या बैंगन न लगाएँ।"
+        ]
+      }
+    },
+    "potato_late_blight": {
+      "crop": "potato",
+      "healthy": false,
+      "en": {
+        "name": "Potato: Late blight",
+        "steps": [
+          "Act quickly. Late blight spreads fast in cool, foggy weather and can destroy a field within a week.",
+          "Contact your KVK the same day. A fungicide recommended for late blight is usually needed. Ask which product and dose to use, and follow the label.",
+          "Stop irrigation for a few days if the field is wet, unless your KVK advises otherwise.",
+          "Destroy badly affected plants away from the field. Do not leave cut plants or rotten tubers lying around.",
+          "Tell nearby farmers. Next season, plant healthy seed tubers from a trusted source."
+        ]
+      },
+      "hi": {
+        "name": "आलू: पछेती झुलसा",
+        "steps": [
+          "जल्दी कदम उठाएँ। ठंडे, कोहरे वाले मौसम में पछेती झुलसा तेज़ी से फैलता है और एक हफ़्ते में खेत बर्बाद कर सकता है।",
+          "उसी दिन अपने KVK से संपर्क करें। आमतौर पर पछेती झुलसा के लिए बताई गई फफूंदनाशक दवा की ज़रूरत होती है। पूछें कि कौन सी दवा कितनी मात्रा में डालें, और लेबल पर लिखे निर्देश मानें।",
+          "अगर खेत गीला है तो कुछ दिन सिंचाई रोक दें, जब तक KVK कुछ और न कहे।",
+          "ज़्यादा प्रभावित पौधे खेत से दूर नष्ट करें। कटे पौधे या सड़े आलू खेत में पड़े न रहने दें।",
+          "पास के किसानों को बताएँ। अगले मौसम में भरोसेमंद जगह से स्वस्थ बीज आलू लगाएँ।"
+        ]
+      }
+    },
+    "potato_healthy": {
+      "crop": "potato",
+      "healthy": true,
+      "en": {
+        "name": "Potato: Healthy leaf",
+        "steps": [
+          "No disease was found on this leaf.",
+          "In cool, foggy weather, check your potato field every two or three days. Late blight can start suddenly.",
+          "If you see dark patches or white mould under the leaves, check again with the app or contact your KVK."
+        ]
+      },
+      "hi": {
+        "name": "आलू: स्वस्थ पत्ती",
+        "steps": [
+          "इस पत्ती पर कोई रोग नहीं मिला।",
+          "ठंडे और कोहरे वाले मौसम में हर दो-तीन दिन में आलू का खेत जाँचें। पछेती झुलसा अचानक शुरू हो सकता है।",
+          "अगर पत्तियों पर काले धब्बे या नीचे सफेद फफूंद दिखे, तो ऐप से फिर जाँचें या अपने KVK से संपर्क करें।"
+        ]
+      }
+    },
+    "maize_common_rust": {
+      "crop": "maize",
+      "healthy": false,
+      "en": {
+        "name": "Maize: Common rust",
+        "steps": [
+          "Rust shows as small brown-red powdery spots on both sides of the leaf.",
+          "A few spots on older plants usually do little harm. Watch whether it spreads to the upper leaves.",
+          "If many upper leaves are covered before the cob fills, ask your KVK whether a fungicide is worth using, and which product and dose.",
+          "Next season, ask your KVK for a hybrid that resists rust."
+        ]
+      },
+      "hi": {
+        "name": "मक्का: रतुआ",
+        "steps": [
+          "रतुआ में पत्ती के दोनों तरफ छोटे भूरे-लाल पाउडर जैसे धब्बे दिखते हैं।",
+          "पुराने पौधों पर थोड़े धब्बों से आमतौर पर ज़्यादा नुकसान नहीं होता। देखते रहें कि रोग ऊपर की पत्तियों तक तो नहीं फैल रहा।",
+          "अगर भुट्टा भरने से पहले ऊपर की बहुत सी पत्तियाँ ढक जाएँ, तो अपने KVK से पूछें कि क्या फफूंदनाशक दवा डालना ठीक रहेगा, और कौन सी दवा कितनी मात्रा में।",
+          "अगले मौसम में KVK से रतुआ रोधी संकर (हाइब्रिड) किस्म के बारे में पूछें।"
+        ]
+      }
+    },
+    "maize_northern_leaf_blight": {
+      "crop": "maize",
+      "healthy": false,
+      "en": {
+        "name": "Maize: Northern leaf blight (Turcicum leaf blight)",
+        "steps": [
+          "This disease makes long, cigar-shaped grey-green or tan patches on the leaves.",
+          "It spreads in warm, humid weather. Watch whether it reaches the leaves around and above the cob.",
+          "If it spreads to the upper leaves before the cob fills, ask your KVK whether a fungicide is needed, and which product and dose.",
+          "After harvest, plough in or remove the crop leftovers. Rotate with a crop other than maize.",
+          "Next season, ask your KVK for a hybrid that resists this disease."
+        ]
+      },
+      "hi": {
+        "name": "मक्का: टर्सिकम पत्ती झुलसा",
+        "steps": [
+          "इस रोग में पत्तियों पर लंबे, सिगार जैसे धूसर-हरे या भूरे धब्बे बनते हैं।",
+          "यह गर्म और नम मौसम में फैलता है। देखते रहें कि रोग भुट्टे के आस-पास और ऊपर की पत्तियों तक तो नहीं पहुँच रहा।",
+          "अगर भुट्टा भरने से पहले रोग ऊपर की पत्तियों तक फैल जाए, तो अपने KVK से पूछें कि क्या फफूंदनाशक दवा चाहिए, और कौन सी दवा कितनी मात्रा में।",
+          "फसल कटने के बाद बचे हुए अवशेष जुताई करके मिट्टी में मिलाएँ या हटा दें। अगली बार मक्का के अलावा कोई दूसरी फसल लगाएँ।",
+          "अगले मौसम में KVK से इस रोग की रोधी संकर किस्म के बारे में पूछें।"
+        ]
+      }
+    },
+    "maize_gray_leaf_spot": {
+      "crop": "maize",
+      "healthy": false,
+      "en": {
+        "name": "Maize: Gray leaf spot",
+        "steps": [
+          "Gray leaf spot makes narrow, rectangular grey or tan patches that run between the leaf veins.",
+          "It survives on old maize leftovers. After harvest, plough them in or remove them.",
+          "Rotate with a crop other than maize for at least one season.",
+          "If it spreads quickly on the upper leaves, ask your KVK whether a fungicide is needed, and which product and dose.",
+          "Next season, ask your KVK for a hybrid that resists this disease."
+        ]
+      },
+      "hi": {
+        "name": "मक्का: धूसर पत्ती धब्बा",
+        "steps": [
+          "इस रोग में पत्ती की नसों के बीच पतले, आयताकार धूसर या भूरे धब्बे बनते हैं।",
+          "यह मक्का के पुराने अवशेषों पर बचा रहता है। फसल कटने के बाद अवशेष जुताई करके मिट्टी में मिलाएँ या हटा दें।",
+          "कम से कम एक मौसम के लिए मक्का के अलावा कोई दूसरी फसल लगाएँ।",
+          "अगर रोग ऊपर की पत्तियों पर तेज़ी से फैले, तो अपने KVK से पूछें कि क्या फफूंदनाशक दवा चाहिए, और कौन सी दवा कितनी मात्रा में।",
+          "अगले मौसम में KVK से इस रोग की रोधी संकर किस्म के बारे में पूछें।"
+        ]
+      }
+    },
+    "maize_healthy": {
+      "crop": "maize",
+      "healthy": true,
+      "en": {
+        "name": "Maize: Healthy leaf",
+        "steps": [
+          "No disease was found on this leaf.",
+          "Check your plants once a week, especially in warm, humid weather.",
+          "If you see spots, long patches or powdery rust, check again with the app or show a leaf at your KVK."
+        ]
+      },
+      "hi": {
+        "name": "मक्का: स्वस्थ पत्ती",
+        "steps": [
+          "इस पत्ती पर कोई रोग नहीं मिला।",
+          "हफ़्ते में एक बार पौधों को जाँचें, खासकर गर्म और नम मौसम में।",
+          "अगर धब्बे, लंबे निशान या पाउडर जैसा रतुआ दिखे, तो ऐप से फिर जाँचें या पत्ती अपने KVK पर दिखाएँ।"
+        ]
+      }
+    }
+  }
+}

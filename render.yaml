@@ -1,0 +1,19 @@
+# Render blueprint for the CropCare backend.
+# Render's free web services have no persistent disk, so SQLite would lose
+# every scan on restart. Set DATABASE_URL to a Postgres database
+# (Render Postgres, Neon or Supabase all have free tiers).
+services:
+  - type: web
+    name: cropcare-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:create_app --factory --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_TOKEN
+        generateValue: true
