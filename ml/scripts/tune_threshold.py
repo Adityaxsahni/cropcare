@@ -23,6 +23,7 @@ def main() -> None:
     ap.add_argument("--data-dir", type=Path, default=Path("../data"))
     ap.add_argument("--source", choices=("plantvillage", "plantdoc"), default="plantdoc")
     ap.add_argument("--target", type=float, default=0.9, help="accuracy wanted on answered photos")
+    ap.add_argument("--grid-start", type=float, default=0.30, help="lowest threshold to try (steps of 0.05 up to 0.95)")
     args = ap.parse_args()
 
     from cropcare import data, predict
@@ -30,7 +31,7 @@ def main() -> None:
     labels = ClassMap.load().labels
     rows = manifest.select(manifest.read(args.data_dir / "manifest.csv"), [args.source], "val")
     probs, y_true = predict.predict(args.model, data.eval_dataset(rows, args.data_dir, labels))
-    threshold, table = metrics.choose_threshold(y_true, probs, args.target, np.round(np.arange(0.30, 0.96, 0.05), 2))
+    threshold, table = metrics.choose_threshold(y_true, probs, args.target, np.round(np.arange(args.grid_start, 0.96, 0.05), 2))
 
     print(f"{len(rows)} {args.source} val images")
     print("threshold  coverage  accuracy_answered")

@@ -5,7 +5,9 @@ image using a 64-bit difference hash. Pairs within --max-distance bits are
 written to leakage_pairs.csv for you to look at by eye.
 
 With --drop, near-duplicate evaluation images are removed from the manifest
-(the original is kept as manifest.before_leakage.csv).
+(the original is kept as manifest.before_leakage.csv). With --drop-from-pairs,
+the rows listed in an existing leakage_pairs.csv are removed without hashing
+again, so you can look at the pairs first and then drop them.
 """
 
 import argparse
@@ -33,16 +35,28 @@ def main() -> None:
     ap.add_argument("--data-dir", type=Path, default=Path("../data"))
     ap.add_argument("--max-distance", type=int, default=4, help="Hamming distance in bits (0 to 64)")
     ap.add_argument("--drop", action="store_true")
+    ap.add_argument("--drop-from-pairs", action="store_true", help="drop the rows in leakage_pairs.csv, no hashing")
     args = ap.parse_args()
 
     manifest_path = args.data_dir / "manifest.csv"
     rows = manifest.read(manifest_path)
+    out = args.data_dir / "leakage_pairs.csv"
+
+    if args.drop_from_pairs:
+        with open(out, newline="", encoding="utf-8") as f:
+            listed = {(r["eval_path"], r["eval_source"], r["eval_split"]) for r in csv.DictReader(f)}
+        leaked = {r for r in rows if (r.path, r.source, r.split) in listed}
+        if leaked:
+            shutil.copyfile(manifest_path, args.data_dir / "manifest.before_leakage.csv")
+            manifest.write(manifest_path, [r for r in rows if r not in leaked])
+        print(f"dropped {len(leaked)} rows listed in {out} from {manifest_path}")
+        return
+
     train = [r for r in rows if r.split == "train"]
     evals = [r for r in rows if r.split in ("val", "test")]
     print(f"hashing {len(train)} train and {len(evals)} val/test images")
     pairs = hashing.near_duplicates(hashes(evals, args.data_dir), hashes(train, args.data_dir), args.max_distance)
 
-    out = args.data_dir / "leakage_pairs.csv"
     with open(out, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["eval_path", "eval_source", "eval_split", "train_path", "train_source", "distance"])

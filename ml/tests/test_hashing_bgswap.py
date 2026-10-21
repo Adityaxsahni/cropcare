@@ -35,3 +35,13 @@ def test_background_swap_keeps_leaf_and_replaces_background():
     out = np.asarray(bgswap.composite(Image.fromarray(seg), background, random.Random(0)))
     assert tuple(out[50, 50]) == (40, 160, 40)
     assert tuple(out[5, 5]) == (150, 100, 60)
+
+
+def test_segmented_copies_match_their_colour_original():
+    from pathlib import PurePosixPath as P
+    originals = {"tomato___healthy/0a1b___rs_hl 1234", "tomato___healthy/plain"}
+    assert bgswap.match_original(P("Tomato___healthy/0a1b___RS_HL 1234_final_masked.jpg"), originals) == "tomato___healthy/0a1b___rs_hl 1234"
+    assert bgswap.match_original(P("Tomato___healthy/0a1b___RS_HL 1234_mask.png"), originals) == "tomato___healthy/0a1b___rs_hl 1234"
+    assert bgswap.match_original(P("Tomato___healthy/plain.jpg"), originals) == "tomato___healthy/plain"
+    assert bgswap.match_original(P("Tomato___healthy/other_final_masked.jpg"), originals) is None
+    assert bgswap.match_original(P("Potato___healthy/plain.jpg"), originals) is None

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+from pathlib import PurePath
 
 import numpy as np
 from PIL import Image, ImageFilter
@@ -34,3 +35,34 @@ def composite(segmented: Image.Image, background: Image.Image, rng: random.Rando
     mask = leaf_mask(leaf)
     bg = random_background_crop(background, leaf.size, rng)
     return Image.composite(leaf, bg, mask)
+
+
+KNOWN_SUFFIXES = ("_final_masked",)
+
+
+def image_key(path: PurePath) -> str:
+    """class folder / file stem, lower case: how a segmented copy is matched to its colour original."""
+    return f"{path.parent.name}/{path.stem}".lower()
+
+
+def match_original(segmented: PurePath, originals: set[str], max_strip: int = 2) -> str | None:
+    """Key of the colour original for a segmented file, or None.
+
+    Tries the stem with a known suffix removed, then with up to `max_strip`
+    trailing "_part" pieces removed, so an unexpected suffix such as "_mask"
+    still matches. Returns the first candidate that is a known original.
+    """
+    stem = segmented.stem
+    for suffix in KNOWN_SUFFIXES:
+        if stem.endswith(suffix):
+            stem = stem[: -len(suffix)]
+    candidates = [stem]
+    for _ in range(max_strip):
+        if "_" not in candidates[-1]:
+            break
+        candidates.append(candidates[-1].rsplit("_", 1)[0])
+    for c in candidates:
+        key = f"{segmented.parent.name}/{c}".lower()
+        if key in originals:
+            return key
+    return None

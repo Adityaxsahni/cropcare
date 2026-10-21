@@ -142,6 +142,13 @@ def main() -> None:
     md += [f"| {row[0]} | {row[1] / 1e6:.2f} | {row[2]:.1%} | {'n/a' if len(row) < 4 else f'{row[3]:.1%}'} |" for row in table]
     text = "\n".join(md) + "\n"
     (out_dir / "conversion.md").write_text(text, encoding="utf-8")
+    rows_json = [
+        {"name": row[0], "file": None if i == 0 else f"cropcare_{list(files)[i - 1]}.tflite",
+         "size_bytes": row[1], "accuracy": row[2], "agreement_with_keras": row[3] if len(row) > 3 else None}
+        for i, row in enumerate(table)
+    ]
+    (out_dir / "conversion.json").write_text(json.dumps(
+        {"eval_source": args.eval_source, "n_images": len(eval_rows), "rows": rows_json}, indent=2), encoding="utf-8")
     print(text)
     print(f"files in {out_dir}")
 

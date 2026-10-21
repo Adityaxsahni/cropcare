@@ -19,18 +19,6 @@ import _bootstrap  # noqa: F401
 from cropcare import bgswap, manifest, prepare
 from cropcare.classes import ClassMap
 
-SEGMENTED_SUFFIXES = ("_final_masked",)
-
-
-def original_key(path: Path) -> str:
-    """class folder / file stem with any segmented-copy suffix removed, lower case."""
-    stem = path.stem
-    for suffix in SEGMENTED_SUFFIXES:
-        if stem.endswith(suffix):
-            stem = stem[: -len(suffix)]
-    return f"{path.parent.name}/{stem}".lower()
-
-
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data-dir", type=Path, default=Path("../data"))
@@ -45,22 +33,23 @@ def main() -> None:
     manifest_path = args.data_dir / "manifest.csv"
     rows = [r for r in manifest.read(manifest_path) if r.source != "plantvillage_bgswap"]
     train_keys = {
-        original_key(Path(r.path)): r.label
+        bgswap.image_key(Path(r.path))
         for r in rows
         if r.source == "plantvillage" and r.split == "train"
     }
-    pv_keys = {original_key(Path(r.path)) for r in rows if r.source == "plantvillage"}
+    pv_keys = {bgswap.image_key(Path(r.path)) for r in rows if r.source == "plantvillage"}
 
     segmented = prepare.scan_class_folders(args.segmented, "plantvillage", cmap)
-    matched = [(p, label) for p, label in segmented if original_key(p) in pv_keys]
+    keyed = [(p, label, bgswap.match_original(p, pv_keys)) for p, label in segmented]
+    matched = [(p, label, key) for p, label, key in keyed if key is not None]
     match_rate = len(matched) / max(1, len(segmented))
     print(f"{len(segmented)} segmented images, {match_rate:.1%} matched to a colour original")
     if match_rate < 0.95:
-        examples = [str(p) for p, _ in segmented if original_key(p) not in pv_keys][:5]
+        examples = [str(p) for p, _, key in keyed if key is None][:5]
         raise SystemExit(
             "error: fewer than 95% of segmented images match a colour original, so splits "
             f"cannot be inherited safely. Unmatched examples: {examples}. "
-            "Adjust SEGMENTED_SUFFIXES in this script."
+            "Add their file-name suffix to KNOWN_SUFFIXES in cropcare/bgswap.py."
         )
 
     backgrounds = prepare.list_images(args.backgrounds)
@@ -70,7 +59,7 @@ def main() -> None:
     out_dir = args.data_dir / "processed" / "bgswap"
     new_rows = []
     for label in cmap.labels:
-        pool = [p for p, lab in matched if lab == label and original_key(p) in train_keys]
+        pool = [p for p, lab, key in matched if lab == label and key in train_keys]
         if not pool:
             print(f"  {label}: no train leaves, skipped")
             continue

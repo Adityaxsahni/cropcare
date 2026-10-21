@@ -2,6 +2,10 @@
 
 Every script prints what it did and writes its numbers to files. Fill `results.md` only from those files.
 
+**Easiest way:** open [`CropCare_Colab.ipynb`](CropCare_Colab.ipynb) in Google Colab (File > Open notebook > GitHub, or upload it) and run it top to bottom. It runs every step below, saves models and results to your Google Drive so a disconnect loses nothing, refuses to test a second model on the field photos, picks the TFLite file by the "at most 2 points lost" rule, and prints the rows for `results.md`. The setup it needs is listed in its first cell.
+
+The rest of this page is the same pipeline as plain commands, for running anywhere else.
+
 All commands run from this `ml/` folder. Data lives in `../data/` (git-ignored).
 
 ## 0. Set up (Colab or Kaggle, GPU runtime)
@@ -30,7 +34,8 @@ Field photo labels must be one of the 14 names in `class_map.json`, and `labelle
 ```bash
 python scripts/prepare_data.py          # writes ../data/manifest.csv; stops on any unknown class folder
 python scripts/verify_images.py         # finds files TensorFlow cannot decode (add --drop to remove them)
-python scripts/check_leakage.py         # near-duplicates between train and val/test (add --drop)
+python scripts/check_leakage.py         # near-duplicates between train and val/test
+python scripts/check_leakage.py --drop-from-pairs   # after looking at the pairs: drop them without hashing again
 python scripts/data_card.py             # writes ml/data_card.md
 ```
 
