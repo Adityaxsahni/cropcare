@@ -57,12 +57,21 @@ def plantdoc_rows(root: Path, data_dir: Path, cmap: ClassMap, seed: str) -> list
 def field_rows(field_dir: Path, data_dir: Path, cmap: ClassMap) -> list[Row]:
     """Rows from field_dir/labels.csv. Every photo needs a label and who labelled it."""
     labels_csv = field_dir / "labels.csv"
-    with open(labels_csv, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        missing = set(FIELD_COLUMNS) - set(reader.fieldnames or ())
-        if missing:
-            raise ValueError(f"{labels_csv}: missing columns {sorted(missing)}")
-        records = list(reader)
+    # utf-8-sig: Excel starts its CSV files with a byte-order mark that would otherwise hide "filename".
+    with open(labels_csv, newline="", encoding="utf-8-sig") as f:
+        text = f.read()
+    header = text.splitlines()[0] if text else ""
+    delimiter = ";" if header.count(";") > header.count(",") else ","  # Excel in some locales uses ;
+    reader = csv.DictReader(text.splitlines(), delimiter=delimiter)
+    fieldnames = [(name or "").strip().lower() for name in reader.fieldnames or ()]
+    missing = set(FIELD_COLUMNS) - set(fieldnames)
+    if missing:
+        raise ValueError(f"{labels_csv}: missing columns {sorted(missing)} (found {fieldnames})")
+    records = []
+    for raw in reader:
+        rec = {k: (v or "").strip() for k, v in zip(fieldnames, raw.values())}
+        if any(rec.values()):  # skip blank lines Excel leaves at the end
+            records.append(rec)
     rows, errors = [], []
     for line, rec in enumerate(records, start=2):
         img = field_dir / "images" / rec["filename"]

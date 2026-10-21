@@ -70,3 +70,23 @@ def test_field_rows_report_every_problem(data_dir, image_factory):
         prepare.field_rows(field, data_dir, ClassMap.load())
     msg = str(e.value)
     assert "unknown label" in msg and "labelled_by is empty" in msg and "image not found" in msg
+
+
+def test_field_labels_saved_by_excel(data_dir, image_factory):
+    field = data_dir / "field"
+    image_factory(field / "images/p1.jpg", seed=5)
+    # UTF-8 byte-order mark, capitalised headers, spaces, CRLF line ends and a blank trailing row
+    (field / "labels.csv").write_bytes(
+        "\ufeffFilename,Label,Labelled_by,Date,Place\r\n p1.jpg , tomato_late_blight ,KVK expert A,2026-11-02,Village X\r\n,,,,\r\n".encode("utf-8")
+    )
+    rows = prepare.field_rows(field, data_dir, ClassMap.load())
+    assert [(r.path, r.label) for r in rows] == [("field/images/p1.jpg", "tomato_late_blight")]
+
+
+def test_field_labels_with_semicolons(data_dir, image_factory):
+    field = data_dir / "field"
+    image_factory(field / "images/p1.jpg", seed=5)
+    (field / "labels.csv").write_text(
+        "filename;label;labelled_by;date;place\np1.jpg;maize_healthy;A;2026-11-02;X\n", encoding="utf-8"
+    )
+    assert [r.label for r in prepare.field_rows(field, data_dir, ClassMap.load())] == ["maize_healthy"]
