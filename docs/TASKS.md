@@ -7,12 +7,13 @@
 - [x] Class map for PlantVillage (TFDS and Kaggle names) and PlantDoc
 - [x] `prepare_data.py`, `verify_images.py`, `check_leakage.py`, `data_card.py`
 - [x] Colab notebook that runs Phases 1 to 4 (`ml/CropCare_Colab.ipynb`)
-- [ ] Download PlantVillage and PlantDoc, run the scripts, commit `ml/data_card.md`
+- [x] Download PlantVillage and PlantDoc, run the scripts, commit `ml/data_card.md`
 - [ ] Collect 150 to 300 field photos with labels and labeller names (at least 20 healthy potato and 20 healthy maize, see ADR-002)
 
 ## Phase 2: Baseline
 - [x] `train.py`, `evaluate.py` with bootstrap confidence intervals
-- [ ] Train the baseline; record the three numbers in `results.md`
+- [x] Train the baseline; record PlantVillage and PlantDoc numbers in `results.md`
+- [ ] Baseline on field photos (needs field photos)
 
 ## Phase 3: Close the gap
 - [x] Mixed sources, strong augmentation, background swap, class weights, unsure threshold

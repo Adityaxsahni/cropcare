@@ -2,7 +2,7 @@
 
 An offline Android app that suggests which of 14 diseases (or healthy) a tomato, potato or maize leaf shows from one photo, and explains what to do in Hindi and English, with spoken Hindi.
 
-**Status:** in development. The code for every part is written and tested. No model has been trained yet, so there are no results to report. See [results.md](results.md): every number there stays blank until it is measured.
+**Status:** in development. The baseline and Phase 3 models are trained: on PlantDoc's real-world test photos, accuracy rose from 31.5% (PlantVillage only) to 57.3% (adding PlantDoc training photos). The phone model is not chosen yet and field photos are not collected yet. Every number, with its margin of error and what is still unmeasured, is in [results.md](results.md).
 
 ## Why this project is different
 
