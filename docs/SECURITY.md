@@ -12,7 +12,7 @@ Names, phone numbers, photos, GPS location, device identifiers (IMEI, Android ID
 ## Server
 - Every request body is validated (pydantic). Unknown fields are rejected. Class must be one of the 14 labels. Confidence must be between 0 and 1.
 - Request bodies above 32 KB are rejected (512 KB for `PUT /advice`). A batch holds at most 50 scans.
-- A simple per-IP rate limit protects the free host from floods.
+- A simple per-IP rate limit protects the free host from floods. The IP comes from the connection, or with `TRUSTED_PROXY_HOPS=N` from the Nth `X-Forwarded-For` entry from the right, so callers cannot dodge the limit by sending their own header.
 - `GET /stats` returns only aggregate counts.
 - CORS is closed by default; the app is not a browser and does not need it.
 - Secrets (`DATABASE_URL`, `ADMIN_TOKEN`) come from environment variables only. `.env` is git-ignored.

@@ -149,3 +149,17 @@ def test_bundled_app_advice_covers_all_labels():
     for label, entry in advice["classes"].items():
         for lang in ("en", "hi"):
             assert entry[lang]["name"] and entry[lang]["steps"], f"{label} {lang}"
+
+
+def test_rate_limit_ignores_spoofed_forwarded_for(tmp_path):
+    body = lambda: {"install_id": str(uuid.uuid4()), "scans": [scan()]}  # noqa: E731
+    # No trusted proxy: the header is ignored, so rotating fake addresses does not reset the limit.
+    direct = TestClient(create_app(f"sqlite:///{tmp_path / 'a.db'}", admin_token="t", rate_limit=2, trusted_proxy_hops=0))
+    codes = [direct.post("/feedback", json=body(), headers={"X-Forwarded-For": f"10.0.0.{i}"}).status_code for i in range(3)]
+    assert codes == [200, 200, 429]
+    # One trusted proxy: the client's own leftmost entries are ignored; the proxy-appended one counts.
+    proxied = TestClient(create_app(f"sqlite:///{tmp_path / 'b.db'}", admin_token="t", rate_limit=2, trusted_proxy_hops=1))
+    codes = [proxied.post("/feedback", json=body(), headers={"X-Forwarded-For": f"6.6.6.{i}, 203.0.113.7"}).status_code for i in range(3)]
+    assert codes == [200, 200, 429]
+    other = proxied.post("/feedback", json=body(), headers={"X-Forwarded-For": "203.0.113.8"})
+    assert other.status_code == 200

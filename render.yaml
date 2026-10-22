@@ -17,3 +17,6 @@ services:
         sync: false
       - key: ADMIN_TOKEN
         generateValue: true
+      # Render puts one proxy in front of the service; trust only the address it appends.
+      - key: TRUSTED_PROXY_HOPS
+        value: "1"

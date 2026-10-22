@@ -15,6 +15,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import IntegrityError
 
 from . import db
 from .schemas import LABELS, AdviceVersion, FeedbackBatch, FeedbackResult, Stats
@@ -44,16 +45,27 @@ class RateLimiter:
         return True
 
 
-def client_ip(request: Request) -> str:
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "unknown"
+def client_ip(request: Request, trusted_hops: int) -> str:
+    """The caller's address for rate limiting.
+
+    X-Forwarded-For is written left to right by each hop, so only the entries
+    added by our own proxies can be trusted: with N trusted proxies, the client
+    is the Nth entry from the right. Anything further left is whatever the
+    caller chose to send. With no trusted proxy the header is ignored.
+    """
+    peer = request.client.host if request.client else "unknown"
+    if trusted_hops <= 0:
+        return peer
+    parts = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
+    return parts[-trusted_hops] if len(parts) >= trusted_hops else peer
 
 
-def create_app(database_url: str | None = None, admin_token: str | None = None, rate_limit: int = 60) -> FastAPI:
+def create_app(
+    database_url: str | None = None, admin_token: str | None = None, rate_limit: int = 60, trusted_proxy_hops: int | None = None
+) -> FastAPI:
     engine: Engine = db.make_engine(database_url or os.environ.get("DATABASE_URL", "sqlite:///./cropcare.db"))
     admin_token = admin_token if admin_token is not None else os.environ.get("ADMIN_TOKEN", "")
+    hops = trusted_proxy_hops if trusted_proxy_hops is not None else int(os.environ.get("TRUSTED_PROXY_HOPS", "0"))
     limiter = RateLimiter(rate_limit)
     app = FastAPI(title="CropCare", docs_url=None, redoc_url=None, openapi_url=None)
 
@@ -66,7 +78,7 @@ def create_app(database_url: str | None = None, admin_token: str | None = None, 
                 return JSONResponse({"detail": "Content-Length required"}, status_code=411)
             if int(length) > limit:
                 return JSONResponse({"detail": "body too large"}, status_code=413)
-            if not limiter.allow(client_ip(request)):
+            if not limiter.allow(client_ip(request, hops)):
                 return JSONResponse({"detail": "too many requests"}, status_code=429)
         return await call_next(request)
 
@@ -87,15 +99,21 @@ def create_app(database_url: str | None = None, admin_token: str | None = None, 
         with engine.begin() as conn:
             for scan in batch.scans:
                 sid = str(scan.scan_id)
-                existing = conn.execute(select(db.scans.c.install_id).where(db.scans.c.scan_id == sid)).first()
-                if existing is None:
-                    conn.execute(insert(db.scans).values(
-                        scan_id=sid, install_id=install, predicted_class=scan.predicted_class.value,
-                        confidence=scan.confidence, correct=scan.correct, model_version=scan.model_version,
-                        app_version=scan.app_version, scanned_at=scan.scanned_at, received_at=now,
-                    ))
+                # Insert first and fall back on a duplicate key, so two uploads of the same
+                # scan arriving together cannot both pass a "does it exist?" check.
+                try:
+                    with conn.begin_nested():
+                        conn.execute(insert(db.scans).values(
+                            scan_id=sid, install_id=install, predicted_class=scan.predicted_class.value,
+                            confidence=scan.confidence, correct=scan.correct, model_version=scan.model_version,
+                            app_version=scan.app_version, scanned_at=scan.scanned_at, received_at=now,
+                        ))
                     stored += 1
-                elif existing.install_id == install and scan.correct is not None:
+                    continue
+                except IntegrityError:
+                    pass
+                existing = conn.execute(select(db.scans.c.install_id).where(db.scans.c.scan_id == sid)).first()
+                if existing.install_id == install and scan.correct is not None:
                     # The farmer answered "Was this correct?" after the scan was first sent.
                     conn.execute(update(db.scans).where(db.scans.c.scan_id == sid).values(correct=scan.correct))
                     updated += 1
