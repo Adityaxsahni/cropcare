@@ -3,11 +3,24 @@
   python scripts/convert.py --model runs/final/model.keras --version 1.0.0
 
 Writes to <model dir>/export/:
-  cropcare_dynamic.tflite + cropcare_dynamic.meta.json
-  cropcare_int8.tflite    + cropcare_int8.meta.json   (int8 weights and activations;
-                                                       see cropcare/tflite_check.py for
-                                                       the float fallback it may need)
-  conversion.md           size and accuracy table for results.md
+  cropcare_dynamic.tflite + cropcare_dynamic.meta.json   (int8 weights, float maths)
+  cropcare_float16.tflite + cropcare_float16.meta.json   (float16 weights, half the size)
+  cropcare_int8.tflite    + cropcare_int8.meta.json      (int8 weights and activations;
+                                                          see cropcare/tflite_check.py)
+  conversion.md / .json   size, accuracy and agreement table for results.md
+
+Accuracy is measured on --eval-source. Because that set can be small (89 PlantDoc
+test photos), each file is also compared with the Keras model on a larger sample
+of PlantVillage and PlantDoc test photos: "agreement" is the share of photos where
+both give the same top answer. Agreement measures conversion damage directly,
+independent of how hard the photos are.
+
+Measured on 2026-10-22 with ImageNet MobileNetV3-Large and a 12-class PlantDoc model:
+full int8 gives the same top answer as the float model on only 12% to 47% of photos,
+whatever the calibration photos and on both XNNPACK and the reference kernels, while
+each layer's own error is normal (about 0.29 quantization steps): the error builds up
+through the squeeze-excite gates. Dynamic range agrees on 82% to 92%. float16 agrees
+on 97% to 100% at half the float32 size. Full int8 would need quantization-aware training.
 
 Copy the chosen .tflite to app/assets/model/cropcare.tflite and its meta file to
 app/assets/model/model_meta.json. Phone latency is measured in the app.
@@ -43,6 +56,8 @@ def main() -> None:
     ap.add_argument("--threshold", type=float, help="default: threshold.json next to the model")
     ap.add_argument("--eval-source", choices=("field", "plantdoc"), default="field")
     ap.add_argument("--representative", type=int, default=300)
+    ap.add_argument("--agreement-images", type=int, default=600,
+                    help="PlantVillage + PlantDoc test photos used to measure agreement with the Keras model")
     args = ap.parse_args()
 
     import tensorflow as tf
@@ -91,6 +106,11 @@ def main() -> None:
     conv.optimizations = [tf.lite.Optimize.DEFAULT]
     files["dynamic"] = (conv.convert(), [])
 
+    conv = tf.lite.TFLiteConverter.from_saved_model(str(saved))
+    conv.optimizations = [tf.lite.Optimize.DEFAULT]
+    conv.target_spec.supported_types = [tf.float16]
+    files["float16"] = (conv.convert(), [])
+
     int8 = int8_converter().convert()
     float_nodes: list[str] = []
     ok, why = tflite_check.runs_with_xnnpack(int8)
@@ -115,6 +135,12 @@ def main() -> None:
     keras_probs, y_true = predict.predict_keras(model, eval_ds)
     table = [("Keras (.keras file)", args.model.stat().st_size, metrics.accuracy(y_true, keras_probs.argmax(1)))]
 
+    agree_rows = manifest.select(rows, ["plantvillage", "plantdoc"], "test")
+    if len(agree_rows) > args.agreement_images:
+        agree_rows = [agree_rows[i] for i in np.random.default_rng(1).choice(len(agree_rows), args.agreement_images, replace=False)]
+    agree_ds = data.eval_dataset(agree_rows, args.data_dir, labels)
+    keras_agree, _ = predict.predict_keras(model, agree_ds)
+
     for name, (blob, nodes) in files.items():
         path = out_dir / f"cropcare_{name}.tflite"
         path.write_bytes(blob)
@@ -134,11 +160,13 @@ def main() -> None:
         }
         (out_dir / f"cropcare_{name}.meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
         probs, _ = predict.predict_tflite(path, eval_ds)
-        agree = float(np.mean(probs.argmax(1) == keras_probs.argmax(1)))
+        probs_agree, _ = predict.predict_tflite(path, agree_ds)
+        agree = float(np.mean(probs_agree.argmax(1) == keras_agree.argmax(1)))
         table.append((f"TFLite {name}", len(blob), metrics.accuracy(y_true, probs.argmax(1)), agree))
 
-    md = [f"Accuracy on {args.eval_source} test ({len(eval_rows)} images)", "",
-          "| Version | Size (MB) | Accuracy | Same top answer as Keras |", "|---|---|---|---|"]
+    md = [f"Accuracy on {args.eval_source} test ({len(eval_rows)} images). Agreement: same top answer as the Keras "
+          f"model on {len(agree_rows)} PlantVillage and PlantDoc test photos.", "",
+          "| Version | Size (MB) | Accuracy | Agreement with Keras |", "|---|---|---|---|"]
     md += [f"| {row[0]} | {row[1] / 1e6:.2f} | {row[2]:.1%} | {'n/a' if len(row) < 4 else f'{row[3]:.1%}'} |" for row in table]
     text = "\n".join(md) + "\n"
     (out_dir / "conversion.md").write_text(text, encoding="utf-8")
@@ -148,7 +176,8 @@ def main() -> None:
         for i, row in enumerate(table)
     ]
     (out_dir / "conversion.json").write_text(json.dumps(
-        {"eval_source": args.eval_source, "n_images": len(eval_rows), "rows": rows_json}, indent=2), encoding="utf-8")
+        {"format": 2, "eval_source": args.eval_source, "n_images": len(eval_rows),
+         "agreement_images": len(agree_rows), "rows": rows_json}, indent=2), encoding="utf-8")
     print(text)
     print(f"files in {out_dir}")
 

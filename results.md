@@ -47,7 +47,9 @@ Measured on PlantDoc test (89 images), because there are no field photos yet.
 | Dynamic range | 3.32 | 52.8% | not measured |
 | Full int8 | 3.53 | 30.3% | not measured |
 
-Chosen file: none yet. Neither file stays within 2 points of the Keras model. The int8 drop is far larger than test-set noise and is being investigated.
+Chosen file: none yet. Neither file stays within 2 points of the Keras model.
+
+Cause of the int8 drop, found on 2026-10-22 by reproducing it on ImageNet MobileNetV3-Large and on a 12-class PlantDoc model: full int8 gives the same top answer as the float model on only 12% to 47% of photos. It is the same with lab, real-world or mixed calibration photos, and on both the phone's XNNPACK runtime and TensorFlow's reference kernels, while every layer on its own quantizes normally. The small errors build up through MobileNetV3's squeeze-excite gates. float16 kept 97% to 100% agreement at half the float32 size, so `convert.py` now also makes a float16 file and chooses by agreement with the Keras model on 600 test photos. Rerun the Phase 4 cell to fill this table again.
 
 ## Phase 6 and 7: pilot
 
