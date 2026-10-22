@@ -9,15 +9,19 @@
 #   and replace DATABASE_URL on the service with its connection string.
 # SQLite is not used here: free web services have no persistent disk.
 
+# Both in Singapore (closest to Bihar): a database is only reachable by its internal
+# address from services in the same region, and regions cannot be changed later.
 databases:
   - name: cropcare-db
     plan: free
+    region: singapore
 
 services:
   - type: web
     name: cropcare-api
     runtime: python
     plan: free
+    region: singapore
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: python -m app
