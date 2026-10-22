@@ -17,12 +17,13 @@
 
 ## Phase 3: Close the gap
 - [x] Mixed sources, strong augmentation, background swap, class weights, unsure threshold
-- [ ] Run each technique; record PlantDoc test macro F1
-- [ ] Tune threshold on PlantDoc val; run the final model once on field photos
+- [x] Run each technique; record PlantDoc test macro F1 (background swap waits for background photos)
+- [x] Tune threshold on PlantDoc val (0.85)
+- [ ] Run the final model once on field photos (needs field photos)
 
 ## Phase 4: Convert
 - [x] `convert.py` with XNNPACK check and float fallback
-- [ ] Convert the final model; record size and accuracy; choose a file
+- [x] Convert the final model; record size and accuracy; choose a file (float16, 6.0 MB)
 
 ## Phase 5: App
 - [x] Home, camera, result, unsure, history, about screens in Hindi and English
@@ -32,7 +33,7 @@
 
 ## Phase 6: Backend
 - [x] `/feedback`, `/stats`, `/advice/version`, `/advice`
-- [ ] Deploy with Postgres; set `EXPO_PUBLIC_API_URL`
+- [x] Deploy with Postgres; set `EXPO_PUBLIC_API_URL` (Render, Singapore)
 
 ## Phase 7: Pilot
 - [ ] 10 to 20 phones; observe 3 users; fix the worst problem; read `/stats` after two weeks

@@ -33,7 +33,8 @@ TECHNIQUES = {
     "p3_3_bgswap": "+ background swap",
     "p3_4_weights": "+ class weights",
 }
-VERSIONS = {"Keras (.keras file)": "Keras", "TFLite dynamic": "Dynamic range", "TFLite int8": "Full int8"}
+VERSIONS = {"Keras (.keras file)": "Keras", "TFLite float16": "float16", "TFLite dynamic": "Dynamic range",
+            "TFLite int8": "Full int8"}
 
 
 def pct(x: float) -> str:
@@ -101,7 +102,9 @@ def data_table(b: Bundle) -> list[str]:
         f"| PlantVillage (our 14 classes) | {show('pv')} | 14 |",
         f"| PlantDoc train and val (our classes) | {show('pd_train')} | 12 |",
         f"| PlantDoc test (our classes) | {show('pd_test')} | 12 |",
-        f"| Own field photos | {show('field')} | {len(field_classes) if has else '___'} |",
+        f"| Own field photos | {show('field')} | {len(field_classes) if has else '___'} |" if counts["field"] or not has else
+        "| Own field photos | not collected yet | |",
+        "", "PlantDoc has no healthy potato or healthy maize photos, so the PlantDoc figures cover 12 classes.",
     ]
 
 
@@ -148,14 +151,25 @@ def render(b: Bundle, old: str) -> str:
 
     conv = b.json(f"runs/{best}/export/conversion.json") if best else None
     on = "Field accuracy" if not conv or conv["eval_source"] == "field" else "PlantDoc test accuracy"
-    lines += ["", "## Phase 4: conversion", "", f"| Version | Size (MB) | {on} | Phone latency (ms, mean of 50) |", "|---|---|---|---|"]
+    lines += ["", "## Phase 4: conversion", ""]
+    if conv and conv.get("agreement_images"):
+        source = "field" if conv["eval_source"] == "field" else "PlantDoc test"
+        lines += [f"Accuracy on {conv['n_images']} {source} photos. Agreement: share of {conv['agreement_images']} PlantVillage and "
+                  "PlantDoc test photos where the file gives the same answer as the Keras model.", ""]
+    lines += [f"| Version | Size (MB) | {on} | Agreement with Keras | Phone latency (ms, mean of 50) |", "|---|---|---|---|---|"]
     by_name = {VERSIONS.get(r["name"], r["name"]): r for r in (conv or {}).get("rows", [])}
     for version in VERSIONS.values():
         r = by_name.get(version)
-        lat = "n/a" if version == "Keras" else latency.get(version, "")
-        lines.append(f"| {version} | {r['size_bytes'] / 1e6:.2f} | {pct(r['accuracy'])} | {lat} |" if r else f"| {version} | | | {lat} |")
+        lat = "n/a" if version == "Keras" else latency.get(version, "not measured")
+        agree = "n/a" if version == "Keras" else pct(r["agreement_with_keras"]) if r and r.get("agreement_with_keras") is not None else ""
+        lines.append(f"| {version} | {r['size_bytes'] / 1e6:.2f} | {pct(r['accuracy'])} | {agree} | {lat} |" if r else
+                     f"| {version} | | | {agree} | {lat} |")
     chosen = b.info.get("chosen_file")
-    lines += ["", f"Chosen file: {chosen or '___'}", "", pilot.rstrip("\n")]
+    lines += ["", f"Chosen file: {chosen or '___'}"]
+    if "Full int8" in by_name:
+        lines += ["", "Full int8 is never chosen for this network: small rounding errors build up through MobileNetV3's "
+                  "squeeze-excite gates, so its answers often differ from the Keras model's (see `ml/scripts/convert.py`)."]
+    lines += ["", pilot.rstrip("\n")]
     return "\n".join(lines) + "\n"
 
 

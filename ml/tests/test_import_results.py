@@ -29,10 +29,12 @@ def make_zip(path: Path, with_model: bool) -> Path:
         z.writestr("final_field_test.json", json.dumps({"model": "/content/drive/MyDrive/cropcare/runs/p3_2_strong/model.keras"}))
         z.writestr("runs/p3_2_strong/threshold.json", json.dumps(
             {"threshold": 0.6, "n_val": 120, "table": [{"threshold": 0.6, "coverage": 0.85, "accuracy_answered": 0.91}]}))
-        z.writestr("runs/p3_2_strong/export/conversion.json", json.dumps({"eval_source": "field", "n_images": 100, "rows": [
-            {"name": "Keras (.keras file)", "size_bytes": 28_000_000, "accuracy": 0.7},
-            {"name": "TFLite dynamic", "size_bytes": 3_300_000, "accuracy": 0.69},
-        ]}))
+        z.writestr("runs/p3_2_strong/export/conversion.json", json.dumps({
+            "eval_source": "field", "n_images": 100, "agreement_images": 600, "rows": [
+                {"name": "Keras (.keras file)", "size_bytes": 28_000_000, "accuracy": 0.7, "agreement_with_keras": None},
+                {"name": "TFLite dynamic", "size_bytes": 3_300_000, "accuracy": 0.69, "agreement_with_keras": 0.62},
+                {"name": "TFLite float16", "size_bytes": 6_000_000, "accuracy": 0.7, "agreement_with_keras": 0.995},
+            ]}))
         if with_model:
             z.writestr("app_model/cropcare.tflite", b"model")
             z.writestr("app_model/model_meta.json", json.dumps({"version": "1.0.0", "labels": labels}))
@@ -46,7 +48,10 @@ def test_render_fills_measured_numbers_and_keeps_hand_entries(tmp_path):
     assert "| + PlantDoc train | | |" in text  # not run: left blank
     assert "Unsure threshold: 0.60 (chosen on PlantDoc val, 120 images). Coverage 85.0%" in text
     assert "Final model on field photos (run once): accuracy 70.0% (70.0% to 88.0%)" in text
-    assert "| Dynamic range | 3.30 | 69.0% | 41 |" in text  # latency typed by hand is kept
+    assert "| Dynamic range | 3.30 | 69.0% | 62.0% | 41 |" in text  # latency typed by hand is kept
+    assert "| float16 | 6.00 | 70.0% | 99.5% | not measured |" in text
+    assert "| Keras | 28.00 | 70.0% | n/a | n/a |" in text
+    assert "| Full int8 | | |  | not measured |" in text and "never chosen" not in text  # int8 not in this zip
     assert "| Scans | 250 |" in text  # pilot section is kept
     assert "Chosen file: cropcare_dynamic.tflite" in text
 

@@ -42,7 +42,3 @@ yarn-error.*
 
 # local config (see .env.example)
 .env
-
-# model files: commit them only once a real, evaluated model exists (see assets/model/README.md)
-assets/model/*.tflite
-assets/model/model_meta.json
