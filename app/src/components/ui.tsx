@@ -67,13 +67,13 @@ export function Body({ children, muted = false }: { children: ReactNode; muted?:
 export function Card({ children, tone = 'plain' }: { children: ReactNode; tone?: 'plain' | 'warn' | 'danger' }) {
   const c = useColors();
   const borderColor = tone === 'warn' ? c.warn : tone === 'danger' ? c.danger : c.border;
-  return <View style={[styles.card, { backgroundColor: c.surface, borderColor, borderLeftWidth: tone === 'plain' ? 1 : 5 }]}>{children}</View>;
+  return <View style={[styles.card, { backgroundColor: c.surface, borderColor, borderWidth: tone === 'plain' ? 1 : 2 }]}>{children}</View>;
 }
 
 export function TestBuildBanner({ text }: { text: string }) {
   const c = useColors();
   return (
-    <View accessibilityRole="alert" style={[styles.card, { backgroundColor: c.surface, borderColor: c.danger, borderLeftWidth: 5 }]}>
+    <View accessibilityRole="alert" style={[styles.card, { backgroundColor: c.surface, borderColor: c.danger, borderWidth: 2 }]}>
       <Text style={[styles.text, { color: c.danger, fontWeight: '700' }]}>{text}</Text>
     </View>
   );
