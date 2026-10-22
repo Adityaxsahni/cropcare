@@ -1,7 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import { router, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Linking, Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import { Camera, CommonResolutions, useCameraDevice, useCameraPermission, usePhotoOutput } from 'react-native-vision-camera';
@@ -16,6 +16,7 @@ import { RADIUS } from '../theme';
 
 const RESIZE_MODE = 'cover' as const;
 const BOX_FRACTION = 0.8; // guide box side as a share of the preview's shorter side
+const PREVIEW_TIMEOUT_MS = 8000; // no first frame by then: say so instead of leaving a black screen
 
 export default function CameraScreen() {
   const { s, recordScan } = useApp();
@@ -28,6 +29,24 @@ export default function CameraScreen() {
   const [view, setView] = useState<{ w: number; h: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Errors from the camera session itself; without this they only reach the console and the preview stays black.
+  const [startError, setStartError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const [previewOn, setPreviewOn] = useState(false);
+  const [previewSlow, setPreviewSlow] = useState(false);
+  const cameraShown = hasPermission && device != null && model.state === 'ready' && startError == null;
+  useEffect(() => {
+    if (!cameraShown || previewOn) return;
+    const timer = setTimeout(() => setPreviewSlow(true), PREVIEW_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [cameraShown, previewOn, attempt]);
+
+  function retryCamera() {
+    setStartError(null);
+    setPreviewOn(false);
+    setPreviewSlow(false);
+    setAttempt((n) => n + 1);
+  }
 
   if (!hasPermission) {
     return (
@@ -58,6 +77,17 @@ export default function CameraScreen() {
         <IconButton icon="chevron-back" label={s.back} onPress={() => router.back()} />
         <Notice tone="danger">{s.modelError}</Notice>
         <Body muted>{model.error}</Body>
+      </Screen>
+    );
+  }
+
+  if (startError) {
+    return (
+      <Screen>
+        <IconButton icon="chevron-back" label={s.back} onPress={() => router.back()} />
+        <Notice tone="danger">{s.cameraStartError}</Notice>
+        <Body muted>{startError}</Body>
+        <Button label={s.retry} icon="refresh" onPress={retryCamera} />
       </Screen>
     );
   }
@@ -107,7 +137,19 @@ export default function CameraScreen() {
   return (
     <View style={styles.fill}>
       <View style={styles.fill} onLayout={(e: LayoutChangeEvent) => setView({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}>
-        <Camera style={StyleSheet.absoluteFill} device={device} isActive={!busy} outputs={[photoOutput]} resizeMode={RESIZE_MODE} />
+        {/* 'compatible' (TextureView): the default SurfaceView does not support views layered on top, and the guide box,
+            hint and back button sit over the preview, which can leave it black on Android. */}
+        <Camera
+          key={attempt}
+          style={StyleSheet.absoluteFill}
+          device={device}
+          isActive={!busy}
+          outputs={[photoOutput]}
+          resizeMode={RESIZE_MODE}
+          implementationMode="compatible"
+          onError={(e: Error) => setStartError(e.message)}
+          onPreviewStarted={() => setPreviewOn(true)}
+        />
         {view ? (
           <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.center]}>
             <View style={[styles.box, { width: boxSide, height: boxSide }]} />
@@ -122,7 +164,16 @@ export default function CameraScreen() {
       </View>
       <View style={styles.controls}>
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        {busy ? <Loading label={s.checking} /> : <Button label={s.takePhoto} icon="camera" variant="inverse" onPress={capture} disabled={!view} />}
+        {previewSlow && !previewOn ? (
+          <>
+            <Text style={styles.error}>{s.cameraStartError}</Text>
+            <Button label={s.retry} icon="refresh" variant="inverse" onPress={retryCamera} />
+          </>
+        ) : busy ? (
+          <Loading label={s.checking} />
+        ) : (
+          <Button label={s.takePhoto} icon="camera" variant="inverse" onPress={capture} disabled={!view} />
+        )}
       </View>
     </View>
   );
