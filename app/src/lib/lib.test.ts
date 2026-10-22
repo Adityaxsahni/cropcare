@@ -44,6 +44,19 @@ describe('model meta', () => {
     expect(isTestModel('0.0.0-standin')).toBe(true);
     expect(isTestModel('1.0.0')).toBe(false);
   });
+  it('accepts the float16 phone model from convert.py (float32 input and output)', () => {
+    const meta = parseModelMeta({
+      ...META,
+      variant: 'float16',
+      input: { dtype: 'float32', shape: [1, 2, 2, 3], scale: 0, zero_point: 0 },
+      output: { dtype: 'float32', shape: [1, 3], scale: 0, zero_point: 0 },
+    });
+    expect(meta.variant).toBe('float16');
+    expect(() => checkModelMatchesMeta([{ dataType: 'float32', shape: [1, 2, 2, 3] }], [{ dataType: 'float32', shape: [1, 3] }], meta)).not.toThrow();
+    const input = new Float32Array(toModelInput(new Uint8Array([0, 128, 255]), meta.input));
+    expect(Array.from(input)).toEqual([0, 128, 255]);
+    expect(readProbabilities(new Float32Array([0.1, 0.7, 0.2]).buffer, meta.output, 3)).toEqual([expect.closeTo(0.1), expect.closeTo(0.7), expect.closeTo(0.2)]);
+  });
   it('checks the loaded model against the metadata', () => {
     const meta = parseModelMeta(META);
     const good = { inputs: [{ dataType: 'uint8', shape: [1, 2, 2, 3] }], outputs: [{ dataType: 'uint8', shape: [1, 3] }] };
