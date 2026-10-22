@@ -163,3 +163,28 @@ def test_rate_limit_ignores_spoofed_forwarded_for(tmp_path):
     assert codes == [200, 200, 429]
     other = proxied.post("/feedback", json=body(), headers={"X-Forwarded-For": "203.0.113.8"})
     assert other.status_code == 200
+
+
+def test_metrics_count_requests_without_personal_data(client, caplog):
+    import logging
+
+    caplog.set_level(logging.INFO, logger="cropcare")
+    client.get("/health")
+    client.post("/feedback", json={"install_id": str(uuid.uuid4()), "scans": [scan()]}, headers={"X-Forwarded-For": "198.51.100.9"})
+    client.post("/feedback", json={"install_id": "bad"})
+    m = client.get("/metrics").json()
+    assert m["routes"]["GET /health"]["requests"] == 1
+    assert m["routes"]["POST /feedback"]["requests"] == 2
+    assert m["routes"]["POST /feedback"]["server_errors"] == 0
+    assert m["uptime_s"] >= 0
+    logged = "\n".join(r.getMessage() for r in caplog.records)
+    assert '"route": "/feedback"' in logged and '"status": 422' in logged
+    assert "198.51.100.9" not in logged and "install_id" not in logged
+
+
+def test_metrics_include_rejected_requests(tmp_path):
+    c = TestClient(create_app(f"sqlite:///{tmp_path / 'm.db'}", admin_token="t", rate_limit=1))
+    c.post("/feedback", json={"install_id": str(uuid.uuid4()), "scans": [scan()]})
+    assert c.post("/feedback", json={"install_id": str(uuid.uuid4()), "scans": [scan()]}).status_code == 429
+    routes = c.get("/metrics").json()["routes"]
+    assert sum(v["requests"] for k, v in routes.items() if k.startswith("POST")) == 2

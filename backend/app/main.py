@@ -5,6 +5,8 @@ Run locally:  uvicorn app.main:create_app --factory --reload
 
 from __future__ import annotations
 
+import json
+import logging
 import os
 import secrets
 import time
@@ -21,6 +23,32 @@ from . import db
 from .schemas import LABELS, AdviceVersion, FeedbackBatch, FeedbackResult, Stats
 
 MAX_BODY_BYTES = 32 * 1024
+log = logging.getLogger("cropcare")
+
+
+class Metrics:
+    """Counters for /metrics, in memory: requests and errors by route, latency, uptime."""
+
+    def __init__(self) -> None:
+        self.started = time.monotonic()
+        self.requests: dict[str, int] = defaultdict(int)
+        self.errors: dict[str, int] = defaultdict(int)
+        self.latency_ms_total: dict[str, float] = defaultdict(float)
+
+    def record(self, route: str, status: int, ms: float) -> None:
+        self.requests[route] += 1
+        self.latency_ms_total[route] += ms
+        if status >= 500:
+            self.errors[route] += 1
+
+    def snapshot(self) -> dict:
+        return {
+            "uptime_s": round(time.monotonic() - self.started),
+            "routes": {
+                r: {"requests": n, "server_errors": self.errors[r], "mean_ms": round(self.latency_ms_total[r] / n, 1)}
+                for r, n in sorted(self.requests.items())
+            },
+        }
 MAX_ADVICE_BYTES = 512 * 1024
 
 
@@ -67,6 +95,7 @@ def create_app(
     admin_token = admin_token if admin_token is not None else os.environ.get("ADMIN_TOKEN", "")
     hops = trusted_proxy_hops if trusted_proxy_hops is not None else int(os.environ.get("TRUSTED_PROXY_HOPS", "0"))
     limiter = RateLimiter(rate_limit)
+    metrics = Metrics()
     app = FastAPI(title="CropCare", docs_url=None, redoc_url=None, openapi_url=None)
 
     @app.middleware("http")
@@ -82,6 +111,23 @@ def create_app(
                 return JSONResponse({"detail": "too many requests"}, status_code=429)
         return await call_next(request)
 
+    @app.middleware("http")
+    async def observe(request: Request, call_next):
+        # Registered last, so it runs outermost and also sees requests the guard rejects.
+        # One JSON line per request. No IP address, query string or body is logged.
+        start = time.perf_counter()
+        status = 500
+        try:
+            response = await call_next(request)
+            status = response.status_code
+            return response
+        finally:
+            ms = (time.perf_counter() - start) * 1000
+            route = request.scope.get("route")
+            name = getattr(route, "path", None) or "unmatched"
+            metrics.record(f"{request.method} {name}", status, ms)
+            log.info(json.dumps({"method": request.method, "route": name, "status": status, "ms": round(ms, 1)}))
+
     def require_admin(authorization: str = Header(default="")) -> None:
         expected = f"Bearer {admin_token}"
         if not admin_token or not secrets.compare_digest(authorization.encode(), expected.encode()):
@@ -89,7 +135,13 @@ def create_app(
 
     @app.get("/health")
     def health() -> dict:
+        with engine.connect() as conn:
+            conn.execute(select(1))  # fails loudly if the database is unreachable, so uptime checks catch it
         return {"ok": True}
+
+    @app.get("/metrics")
+    def get_metrics() -> dict:
+        return metrics.snapshot()
 
     @app.post("/feedback", response_model=FeedbackResult)
     def feedback(batch: FeedbackBatch) -> FeedbackResult:

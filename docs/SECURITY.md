@@ -14,6 +14,8 @@ Names, phone numbers, photos, GPS location, device identifiers (IMEI, Android ID
 - Request bodies above 32 KB are rejected (512 KB for `PUT /advice`). A batch holds at most 50 scans.
 - A simple per-IP rate limit protects the free host from floods. The IP comes from the connection, or with `TRUSTED_PROXY_HOPS=N` from the Nth `X-Forwarded-For` entry from the right, so callers cannot dodge the limit by sending their own header.
 - `GET /stats` returns only aggregate counts.
+- Each request is logged as one JSON line with method, route, status and latency. No IP address, query string, body or install ID is logged.
+- `GET /metrics` returns request and server-error counts and mean latency per route, plus uptime; `GET /health` also checks the database, so an uptime monitor catches a dead database.
 - CORS is closed by default; the app is not a browser and does not need it.
 - Secrets (`DATABASE_URL`, `ADMIN_TOKEN`) come from environment variables only. `.env` is git-ignored.
 - `PUT /advice` requires the `ADMIN_TOKEN` bearer token.
