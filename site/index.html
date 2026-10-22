@@ -69,7 +69,21 @@
       <li><strong>PlantDoc</strong>: real-world photos from the internet, with its own test split.</li>
       <li><strong>Our own field photos</strong>: taken on farms near us and labelled by people who know the diseases. These are used only once, for the final test, and never for training.</li>
     </ul>
-    <p>Results will be published here with the size of each test set and the margin of error. Until they are measured, we do not publish any accuracy figure.</p>
+
+    <h2 id="results">Results so far</h2>
+    <p>Measured on 22 October 2026. The ranges are 95% confidence intervals: the PlantDoc test set has only 89 photos, so its numbers can move by several points.</p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th scope="col">Model</th><th scope="col">Lab photos (PlantVillage, 2,060)</th><th scope="col">Real-world photos (PlantDoc, 89)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Trained on lab photos only</td><td>98.0% (97.3% to 98.6%)</td><td>31.5% (22.5% to 41.6%)</td></tr>
+          <tr><td>Lab photos plus real-world training photos</td><td>not re-tested</td><td>57.3%; macro F1 0.555 (0.438 to 0.640), up from 0.241</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The same model that scores 98% on lab photos gets fewer than one in three real-world photos right. Adding real-world photos to training nearly doubled that. Not measured yet: our own field photos, and the final model on the phone. Every figure, with how it was produced, is in <a href="https://github.com/Adityaxsahni/cropcare/blob/main/results.md">results.md</a>.</p>
 
     <h2>Treatment advice</h2>
     <p>The treatment steps in the app are written in plain Hindi and English. Before the app reaches farmers, every step will be checked by an agriculture expert, and the expert's name will be shown in the app. The app never gives pesticide doses from its own text; it asks farmers to follow the product label and their KVK.</p>
