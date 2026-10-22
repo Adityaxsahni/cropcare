@@ -22,7 +22,7 @@ Crop disease models trained on PlantVillage often score about 99% on PlantVillag
 ## Run it
 
 ### ML (Phases 1 to 4)
-Open [ml/CropCare_Colab.ipynb](ml/CropCare_Colab.ipynb) in Google Colab and run it top to bottom on a free T4 GPU. [ml/README.md](ml/README.md) has the same steps as plain commands.
+Open [ml/CropCare_Colab.ipynb](ml/CropCare_Colab.ipynb) in Google Colab and run it top to bottom on a free T4 GPU. It also runs on Kaggle Notebooks when Colab's free GPU time is used up. [ml/README.md](ml/README.md) has the same steps as plain commands.
 
 Unit tests run anywhere, without TensorFlow:
 ```bash

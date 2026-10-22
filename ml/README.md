@@ -4,6 +4,8 @@ Every script prints what it did and writes its numbers to files. Fill `results.m
 
 **Easiest way:** open [`CropCare_Colab.ipynb`](https://colab.research.google.com/github/Adityaxsahni/cropcare/blob/main/ml/CropCare_Colab.ipynb) in Google Colab and run it top to bottom. It runs every step below, saves models and results to your Google Drive so a disconnect loses nothing, refuses to test a second model on the field photos, picks the TFLite file by the "at most 2 points lost" rule, and prints the rows for `results.md`. The setup it needs is listed in its first cell.
 
+**When Colab's free GPU allowance has run out:** the same notebook runs on Kaggle (about 30 free GPU hours a week). Import it with File > Import Notebook, set Accelerator to GPU T4 x2 and Internet on, add the `abdallahalidev/plantvillage-dataset` input, then Save Version > Save & Run All. No secrets are needed there, and results land in the version's Output tab.
+
 The rest of this page is the same pipeline as plain commands, for running anywhere else.
 
 All commands run from this `ml/` folder. Data lives in `../data/` (git-ignored).
