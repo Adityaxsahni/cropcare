@@ -45,7 +45,7 @@ Copy `app/.env.example` to `app/.env` to set the backend URL and privacy policy 
 cd backend
 python -m venv .venv && .venv/Scripts/pip install -r requirements-dev.txt
 .venv/Scripts/python -m pytest -q
-.venv/Scripts/uvicorn app.main:create_app --factory --reload
+.venv/Scripts/python -m app
 ```
 `render.yaml` deploys it to Render. Use a Postgres `DATABASE_URL` there; Render's free web services have no persistent disk.
 
