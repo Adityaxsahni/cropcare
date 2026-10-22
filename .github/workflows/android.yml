@@ -146,4 +146,8 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: ${{ steps.apk.outputs.name }}
+          # A tag with a suffix, such as v1.0.0-pilot.1, is a pilot build, not the public launch.
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          name: ${{ contains(github.ref_name, '-') && format('CropCare {0} (pilot test build)', github.ref_name) || format('CropCare {0}', github.ref_name) }}
+          body_path: docs/RELEASE_NOTES.md
           generate_release_notes: true
