@@ -31,6 +31,22 @@
     "plugins": [
       "expo-router",
       "react-native-fast-tflite",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "CropCare uses the camera to photograph a leaf. The photo is checked on this phone.",
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "CropCare opens a leaf photo you choose. The photo is checked on this phone.",
+          "cameraPermission": "CropCare uses the camera to photograph a leaf. The photo is checked on this phone.",
+          "microphonePermission": false
+        }
+      ],
       "expo-font",
       [
         "expo-splash-screen",

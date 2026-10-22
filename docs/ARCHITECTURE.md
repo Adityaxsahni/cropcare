@@ -3,7 +3,8 @@
 ```
 Phone (offline)                                   Server (optional, when online)
 +-------------------------------------------+     +----------------------------+
-| Camera frame (VisionCamera)               |     | FastAPI                    |
+| Photo (expo-camera, or the phone's camera |     | FastAPI                    |
+|   app / gallery via expo-image-picker)    |     |                            |
 |   -> centre square crop, resize 224x224   |     |   POST /feedback           |
 |   -> TFLite model (react-native-fast-     |     |   GET  /stats              |
 |      tflite)                              |     |   GET  /advice/version     |

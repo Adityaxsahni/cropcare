@@ -103,17 +103,18 @@ export function Button({
   label: string;
   icon?: IconName;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'inverse';
+  variant?: 'primary' | 'secondary' | 'inverse' | 'inverseOutline';
   disabled?: boolean;
   style?: ViewStyle;
 }) {
   const c = useColors();
   const primary = variant === 'primary';
-  // inverse: paper button on the black camera screen, in both colour schemes
+  // inverse and inverseOutline: paper filled and paper outlined buttons on the black camera screen, in both colour schemes
   const inverse = variant === 'inverse';
-  const fg = inverse ? '#1E1A16' : primary ? c.onPrimary : c.text;
+  const outline = variant === 'inverseOutline';
+  const fg = inverse ? '#1E1A16' : outline ? '#FBF8F2' : primary ? c.onPrimary : c.text;
   const bg = inverse ? '#FBF8F2' : primary ? c.primary : 'transparent';
-  const border = inverse ? '#FBF8F2' : primary ? c.primary : c.text;
+  const border = inverse || outline ? '#FBF8F2' : primary ? c.primary : c.text;
   return (
     <Pressable
       accessibilityRole="button"

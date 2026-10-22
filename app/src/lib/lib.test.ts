@@ -5,7 +5,7 @@ import { cropMismatch, cropOf, isCrop, labelsOf } from './crops';
 import { addScan, averageInferenceMs, filterByCrop, HISTORY_LIMIT, setAnswer, type Scan } from './history';
 import { checkModelMatchesMeta, isTestModel, parseModelMeta } from './model';
 import { alternatives, confidenceLevel, decide, readProbabilities } from './postprocess';
-import { guideCrop, toModelInput, toRgb } from './preprocess';
+import { centreSquare, guideCrop, toModelInput, toRgb } from './preprocess';
 import { enqueue, flush, hourOf, toPending, type PendingScan } from './queue';
 
 const LABELS = ['a', 'b', 'c'];
@@ -80,6 +80,12 @@ describe('preprocess', () => {
     expect(c.size).toBe(800);
     expect(c.x).toBe(100);
     expect(c.y).toBe(0);
+  });
+  it('takes the centred square of a photo without a guide box', () => {
+    expect(centreSquare(1200, 1600)).toEqual({ x: 0, y: 200, size: 1200 });
+    expect(centreSquare(1601, 1200)).toEqual({ x: 200, y: 0, size: 1200 });
+    expect(centreSquare(500, 500)).toEqual({ x: 0, y: 0, size: 500 });
+    expect(() => centreSquare(0, 10)).toThrow();
   });
 
   it('reorders BGRA to RGB and drops alpha', () => {

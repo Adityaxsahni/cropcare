@@ -31,6 +31,13 @@ export function guideCrop(
   return { x: Math.floor((photoW - size) / 2), y: Math.floor((photoH - size) / 2), size };
 }
 
+/** The largest centred square of a photo with no guide box (from the phone's camera app or gallery). */
+export function centreSquare(photoW: number, photoH: number): Crop {
+  if (photoW <= 0 || photoH <= 0) throw new Error('centreSquare: sizes must be positive');
+  const size = Math.min(photoW, photoH);
+  return { x: Math.floor((photoW - size) / 2), y: Math.floor((photoH - size) / 2), size };
+}
+
 type Layout = { bpp: 3 | 4; r: number; g: number; b: number };
 
 const LAYOUTS: Record<string, Layout> = {
