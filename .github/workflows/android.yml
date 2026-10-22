@@ -78,6 +78,19 @@ jobs:
       - run: npm ci
         working-directory: app
 
+      # Every build gets a higher versionCode, so Android installs it as an update of the last one.
+      - name: Set versionCode
+        run: |
+          python - <<'EOF'
+          import json, os
+          p = "app.json"
+          cfg = json.load(open(p, encoding="utf-8"))
+          cfg["expo"]["android"]["versionCode"] = int(os.environ["GITHUB_RUN_NUMBER"])
+          json.dump(cfg, open(p, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+          EOF
+          echo "versionCode: $GITHUB_RUN_NUMBER" >> "$GITHUB_STEP_SUMMARY"
+        working-directory: app
+
       - name: Generate the Android project
         run: npx expo prebuild --platform android --no-install
         working-directory: app
@@ -93,6 +106,21 @@ jobs:
           cp app/android/app/build/outputs/apk/release/app-release.apk "$name"
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "APK: $name ($(du -h "$name" | cut -f1))" >> "$GITHUB_STEP_SUMMARY"
+
+      # Fails the build if the APK would not install: bad signature, or no package line in the manifest.
+      - name: Check the APK installs
+        run: |
+          tools="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          "$tools/apksigner" verify --verbose --print-certs "${{ steps.apk.outputs.name }}" | tee apksigner.txt
+          "$tools/aapt2" dump badging "${{ steps.apk.outputs.name }}" > badging.txt
+          {
+            echo '```'
+            grep -E "^Verified using|^Signer #1 certificate (DN|SHA-256)" apksigner.txt
+            grep -E "^package:|^sdkVersion|^targetSdkVersion|^native-code|^uses-permission" badging.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          grep -q "^Verified using v2 scheme (APK Signature Scheme v2): true" apksigner.txt
+          grep -q "^package: name='com.cropcare.app'" badging.txt
 
       - uses: actions/upload-artifact@v7
         with:
