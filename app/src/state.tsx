@@ -6,6 +6,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import bundledAdvice from '../assets/advice.json';
 import { strings, type Strings } from './i18n';
 import { fetchNewerAdvice, pickAdvice, type Advice, type Language } from './lib/advice';
+import type { Crop } from './lib/crops';
 import { addScan, setAnswer, type Answer, type Scan } from './lib/history';
 import { enqueue, flush, toPending, type PendingScan } from './lib/queue';
 import { KEYS, load, remove, save } from './lib/storage';
@@ -17,7 +18,7 @@ const BUNDLED = bundledAdvice as Advice;
 const LABELS = Object.keys(BUNDLED.classes);
 
 export type Consent = 'yes' | 'no' | null;
-type Settings = { language: Language; consent: Consent };
+type Settings = { language: Language; consent: Consent; onboarded?: boolean; lastCrop?: Crop };
 
 type AppState = {
   ready: boolean;
@@ -28,6 +29,10 @@ type AppState = {
   consent: Consent;
   sharingAvailable: boolean;
   setConsent: (c: Exclude<Consent, null>) => void;
+  onboarded: boolean;
+  completeOnboarding: () => void;
+  lastCrop: Crop;
+  setLastCrop: (c: Crop) => void;
   history: Scan[];
   recordScan: (scan: Scan) => void;
   answerScan: (id: string, answer: Exclude<Answer, null>) => void;
@@ -173,6 +178,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       consent: settings.consent,
       sharingAvailable: API_URL.length > 0,
       setConsent,
+      onboarded: settings.onboarded === true,
+      completeOnboarding: () => updateSettings({ onboarded: true }),
+      lastCrop: settings.lastCrop ?? 'tomato',
+      setLastCrop: (lastCrop) => updateSettings({ lastCrop }),
       history,
       recordScan,
       answerScan,

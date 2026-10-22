@@ -1,10 +1,15 @@
 export type Answer = 'yes' | 'no' | null;
 
+export type UnsureReason = 'low_confidence' | 'other_crop';
+
 export type Scan = {
   id: string;
   label: string;
   confidence: number;
   unsure: boolean;
+  unsureReason?: UnsureReason;
+  chosenCrop?: string; // the crop the farmer picked before taking the photo
+  alternatives?: { label: string; confidence: number }[];
   createdAt: string; // ISO time
   modelVersion: string;
   inferenceMs: number; // model.run only
@@ -20,6 +25,11 @@ export function addScan(list: Scan[], scan: Scan): Scan[] {
 
 export function setAnswer(list: Scan[], id: string, answer: Answer): Scan[] {
   return list.map((s) => (s.id === id ? { ...s, answer } : s));
+}
+
+/** Checks of one crop (by the label the model gave), or all of them. */
+export function filterByCrop(list: Scan[], crop: string | 'all'): Scan[] {
+  return crop === 'all' ? list : list.filter((s) => s.label.split('_')[0] === crop);
 }
 
 /** Mean model time over the newest `n` scans, for the phone speed figure in results.md. */

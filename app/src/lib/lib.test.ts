@@ -1,9 +1,10 @@
 import { describe, expect, it, jest } from '@jest/globals';
 
 import { isCompleteAdvice, pickAdvice, fetchNewerAdvice, type Advice } from './advice';
-import { addScan, averageInferenceMs, HISTORY_LIMIT, setAnswer, type Scan } from './history';
+import { cropMismatch, cropOf, isCrop, labelsOf } from './crops';
+import { addScan, averageInferenceMs, filterByCrop, HISTORY_LIMIT, setAnswer, type Scan } from './history';
 import { checkModelMatchesMeta, isTestModel, parseModelMeta } from './model';
-import { confidenceLevel, decide, readProbabilities } from './postprocess';
+import { alternatives, confidenceLevel, decide, readProbabilities } from './postprocess';
 import { guideCrop, toModelInput, toRgb } from './preprocess';
 import { enqueue, flush, hourOf, toPending, type PendingScan } from './queue';
 
@@ -200,5 +201,35 @@ describe('advice', () => {
     expect(await fetchNewerAdvice('https://x/', 2, getFn)).toBeNull();
     expect(getFn).toHaveBeenCalledTimes(1);
     expect(((await fetchNewerAdvice('https://x', 1, getFn)) as Advice).version).toBe(2);
+  });
+});
+
+describe('crops', () => {
+  const all = ['tomato_late_blight', 'tomato_healthy', 'potato_healthy', 'maize_common_rust'];
+  it('reads the crop from a label', () => {
+    expect(cropOf('maize_common_rust')).toBe('maize');
+    expect(cropOf('rice_blast')).toBeNull();
+    expect(isCrop('potato')).toBe(true);
+    expect(labelsOf('tomato', all)).toEqual(['tomato_late_blight', 'tomato_healthy']);
+  });
+  it('flags a photo of another crop', () => {
+    expect(cropMismatch('maize_common_rust', 'tomato')).toBe('maize');
+    expect(cropMismatch('tomato_healthy', 'tomato')).toBeNull();
+    expect(cropMismatch('tomato_healthy', null)).toBeNull();
+  });
+});
+
+describe('alternatives and filters', () => {
+  it('lists the next likely conditions, skipping tiny ones', () => {
+    expect(alternatives([0.7, 0.2, 0.01, 0.09], ['a', 'b', 'c', 'd'])).toEqual([
+      { label: 'b', confidence: 0.2 },
+      { label: 'd', confidence: 0.09 },
+    ]);
+    expect(alternatives([0.99, 0.005, 0.005], ['a', 'b', 'c'])).toEqual([]);
+  });
+  it('filters history by crop', () => {
+    const list = [scan('1', { label: 'tomato_healthy' }), scan('2', { label: 'maize_healthy' })];
+    expect(filterByCrop(list, 'maize').map((s) => s.id)).toEqual(['2']);
+    expect(filterByCrop(list, 'all')).toHaveLength(2);
   });
 });

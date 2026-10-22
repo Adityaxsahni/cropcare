@@ -1,29 +1,24 @@
-import { Stack } from 'expo-router';
+import { Stack, type ErrorBoundaryProps } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { ToastProvider } from '../components/toast';
+import { strings } from '../i18n';
 import { ModelProvider } from '../model';
-import { AppStateProvider, useApp } from '../state';
-import { FONT, useColors } from '../theme';
+import { AppStateProvider } from '../state';
+import { RADIUS, useColors } from '../theme';
 
 function AppStack() {
   const c = useColors();
-  const { s } = useApp();
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: { backgroundColor: c.surface },
-        headerTintColor: c.text,
-        headerTitleStyle: { fontSize: FONT.body },
-        contentStyle: { backgroundColor: c.bg },
-      }}
-    >
-      <Stack.Screen name="index" options={{ title: s.appName }} />
-      <Stack.Screen name="camera" options={{ title: s.checkLeaf }} />
-      <Stack.Screen name="result/[id]" options={{ title: s.appName }} />
-      <Stack.Screen name="unsure" options={{ title: s.unsureTitle }} />
-      <Stack.Screen name="history" options={{ title: s.history }} />
-      <Stack.Screen name="about" options={{ title: s.about }} />
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}>
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="camera" />
+      <Stack.Screen name="result/[id]" />
+      <Stack.Screen name="unsure" />
+      <Stack.Screen name="condition/[label]" />
     </Stack>
   );
 }
@@ -33,10 +28,35 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <AppStateProvider>
         <ModelProvider>
-          <StatusBar style="auto" />
-          <AppStack />
+          <ToastProvider>
+            <StatusBar style="auto" />
+            <AppStack />
+          </ToastProvider>
         </ModelProvider>
       </AppStateProvider>
     </SafeAreaProvider>
+  );
+}
+
+/**
+ * Shown instead of a blank screen if a screen crashes. It cannot rely on app
+ * state (that may be what failed), so it shows both languages.
+ */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  const c = useColors();
+  return (
+    <View style={{ flex: 1, backgroundColor: c.bg, padding: 24, justifyContent: 'center', gap: 12 }}>
+      <Text style={{ color: c.text, fontSize: 26 }}>{strings.hi.errorTitle}</Text>
+      <Text style={{ color: c.text, fontSize: 17 }}>{strings.hi.errorBody}</Text>
+      <Text style={{ color: c.muted, fontSize: 17 }}>{strings.en.errorTitle}. {strings.en.errorBody}</Text>
+      <Text style={{ color: c.muted, fontSize: 13 }}>{error.message}</Text>
+      <Text
+        accessibilityRole="button"
+        onPress={retry}
+        style={{ marginTop: 8, color: c.onPrimary, backgroundColor: c.primary, fontSize: 17, fontWeight: '600', textAlign: 'center', paddingVertical: 16, borderRadius: RADIUS, overflow: 'hidden' }}
+      >
+        {strings.hi.retry} / {strings.en.retry}
+      </Text>
+    </View>
   );
 }

@@ -1,21 +1,26 @@
 import * as Crypto from 'expo-crypto';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
-import { Linking, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Linking, Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import { Camera, CommonResolutions, useCameraDevice, useCameraPermission, usePhotoOutput } from 'react-native-vision-camera';
 
-import { Body, Button, Card, Heading, Loading, Screen } from '../components/ui';
+import { Body, Button, IconButton, Loading, Notice, Screen, Title } from '../components/ui';
 import { classifyPhoto } from '../lib/classify';
-import { decide } from '../lib/postprocess';
+import { cropMismatch, isCrop } from '../lib/crops';
+import { alternatives, decide } from '../lib/postprocess';
 import { useModel } from '../model';
 import { useApp } from '../state';
-import { FONT, RADIUS } from '../theme';
+import { RADIUS } from '../theme';
 
 const RESIZE_MODE = 'cover' as const;
 const BOX_FRACTION = 0.8; // guide box side as a share of the preview's shorter side
 
 export default function CameraScreen() {
   const { s, recordScan } = useApp();
+  const params = useLocalSearchParams<{ crop?: string }>();
+  const crop = isCrop(params.crop) ? params.crop : null;
   const model = useModel();
   const { hasPermission, canRequestPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('back');
@@ -27,7 +32,8 @@ export default function CameraScreen() {
   if (!hasPermission) {
     return (
       <Screen>
-        <Heading>{s.cameraNeededTitle}</Heading>
+        <IconButton icon="chevron-back" label={s.back} onPress={() => router.back()} />
+        <Title>{s.cameraNeededTitle}</Title>
         <Body>{canRequestPermission ? s.cameraNeededBody : s.cameraDenied}</Body>
         {canRequestPermission ? (
           <Button label={s.allowCamera} icon="camera" onPress={requestPermission} />
@@ -40,7 +46,8 @@ export default function CameraScreen() {
   if (device == null) {
     return (
       <Screen>
-        <Body>{s.noCamera}</Body>
+        <IconButton icon="chevron-back" label={s.back} onPress={() => router.back()} />
+        <Notice>{s.noCamera}</Notice>
       </Screen>
     );
   }
@@ -48,10 +55,9 @@ export default function CameraScreen() {
   if (model.state === 'error') {
     return (
       <Screen>
-        <Card tone="danger">
-          <Body>{s.modelError}</Body>
-          <Body muted>{model.error}</Body>
-        </Card>
+        <IconButton icon="chevron-back" label={s.back} onPress={() => router.back()} />
+        <Notice tone="danger">{s.modelError}</Notice>
+        <Body muted>{model.error}</Body>
       </Screen>
     );
   }
@@ -72,19 +78,25 @@ export default function CameraScreen() {
         model.meta,
       );
       const d = decide(probs, model.meta.labels, model.meta.threshold);
+      const otherCrop = d.kind === 'answer' ? cropMismatch(d.label, crop) : null;
+      const unsure = d.kind === 'unsure' || otherCrop !== null;
       const id = Crypto.randomUUID();
       recordScan({
         id,
         label: d.label,
         confidence: d.confidence,
-        unsure: d.kind === 'unsure',
+        unsure,
+        unsureReason: otherCrop ? 'other_crop' : d.kind === 'unsure' ? 'low_confidence' : undefined,
+        chosenCrop: crop ?? undefined,
+        alternatives: alternatives(probs, model.meta.labels),
         createdAt: new Date().toISOString(),
         modelVersion: model.meta.version,
         inferenceMs,
         totalMs: performance.now() - started,
         answer: null,
       });
-      if (d.kind === 'unsure') router.replace('/unsure');
+      if (otherCrop && crop) router.replace({ pathname: '/unsure', params: { reason: 'other_crop', chosen: crop, detected: otherCrop } });
+      else if (d.kind === 'unsure') router.replace({ pathname: '/unsure', params: { reason: 'low_confidence', chosen: crop ?? '' } });
       else router.replace({ pathname: '/result/[id]', params: { id } });
     } catch {
       setError(s.captureError);
@@ -99,13 +111,18 @@ export default function CameraScreen() {
         {view ? (
           <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.center]}>
             <View style={[styles.box, { width: boxSide, height: boxSide }]} />
-            <Text style={styles.hint}>{s.cameraHint}</Text>
+            <Text style={styles.hint}>{crop ? s.cameraHintCrop(s.cropsLower[crop]) : s.cameraHint}</Text>
           </View>
         ) : null}
+        <SafeAreaView edges={['top', 'left']} style={styles.back}>
+          <Pressable accessibilityRole="button" accessibilityLabel={s.back} onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={26} color="#FBF8F2" />
+          </Pressable>
+        </SafeAreaView>
       </View>
       <View style={styles.controls}>
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        {busy ? <Loading label={s.checking} /> : <Button label={s.takePhoto} icon="camera" onPress={capture} disabled={!view} />}
+        {busy ? <Loading label={s.checking} /> : <Button label={s.takePhoto} icon="camera" variant="inverse" onPress={capture} disabled={!view} />}
       </View>
     </View>
   );
@@ -118,13 +135,15 @@ const styles = StyleSheet.create({
   hint: {
     marginTop: 16,
     color: '#FFFFFF',
-    fontSize: FONT.body,
+    fontSize: 17,
     fontWeight: '600',
     backgroundColor: 'rgba(0,0,0,0.6)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: RADIUS,
   },
+  back: { position: 'absolute', top: 0, left: 0 },
+  backButton: { margin: 12, width: 48, height: 48, borderRadius: RADIUS, backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', justifyContent: 'center' },
   controls: { padding: 16, backgroundColor: '#000', minHeight: 120, justifyContent: 'center' },
-  error: { color: '#FFFFFF', fontSize: FONT.body, marginBottom: 12, textAlign: 'center' },
+  error: { color: '#FFFFFF', fontSize: 17, marginBottom: 12, textAlign: 'center' },
 });

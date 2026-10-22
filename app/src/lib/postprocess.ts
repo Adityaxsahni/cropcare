@@ -29,6 +29,17 @@ export function decide(probs: number[], labels: string[], threshold: number): De
   return { kind: confidence >= threshold ? 'answer' : 'unsure', index, label: labels[index], confidence };
 }
 
+export type Alternative = { label: string; confidence: number };
+
+/** The next most likely conditions after the top one, so a result can be explained. */
+export function alternatives(probs: number[], labels: string[], count = 2, minConfidence = 0.02): Alternative[] {
+  return probs
+    .map((p, i) => ({ label: labels[i], confidence: p }))
+    .sort((a, b) => b.confidence - a.confidence)
+    .slice(1, count + 1)
+    .filter((a) => a.confidence >= minConfidence);
+}
+
 export type ConfidenceLevel = 'high' | 'medium' | 'low';
 
 export function confidenceLevel(confidence: number): ConfidenceLevel {

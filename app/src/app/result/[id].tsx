@@ -1,119 +1,96 @@
-import * as Speech from 'expo-speech';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Body, Button, Card, Heading, Screen, TestBuildBanner } from '../../components/ui';
-import { IS_TEST_MODEL } from '../../model';
+import { ConditionDetail, ListenFooter } from '../../components/condition';
+import { useToast } from '../../components/toast';
+import { Body, Button, Card, Chip, ChipRow, IconButton, InfoGrid, Kicker, Meta, Screen, TestBuildBanner } from '../../components/ui';
+import { cropOf } from '../../lib/crops';
 import { confidenceLevel } from '../../lib/postprocess';
+import { IS_TEST_MODEL } from '../../model';
 import { useApp } from '../../state';
-import { FONT, useColors } from '../../theme';
-
-const SPEECH_LANG = { hi: 'hi-IN', en: 'en-IN' } as const;
+import { useColors } from '../../theme';
 
 export default function Result() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { s, language, history, answerScan, advice } = useApp();
+  const toast = useToast();
   const c = useColors();
-  const [speaking, setSpeaking] = useState(false);
-  const [voiceMissing, setVoiceMissing] = useState(false);
   const scan = history.find((x) => x.id === id);
   const entry = scan ? advice.classes[scan.label] : undefined;
-
-  useEffect(() => () => void Speech.stop(), []);
 
   if (!scan || !entry) {
     return (
       <Screen>
         <Body>{s.scanNotFound}</Body>
-        <Button label={s.goHome} icon="home" onPress={() => router.replace('/')} />
+        <Button label={s.goHome} icon="home-outline" onPress={() => router.replace('/')} />
       </Screen>
     );
   }
 
-  const text = entry[language];
-  const other = entry[language === 'hi' ? 'en' : 'hi'];
+  const locale = language === 'hi' ? 'hi-IN' : 'en-IN';
   const level = confidenceLevel(scan.confidence);
-  const percent = Math.round(scan.confidence * 100);
-
-  async function listen() {
-    if (speaking) {
-      await Speech.stop();
-      setSpeaking(false);
-      return;
-    }
-    const lang = SPEECH_LANG[language];
-    const voices = await Speech.getAvailableVoicesAsync().catch(() => []);
-    // Some phones report no voices at all; only warn when the list is known and has no Hindi voice.
-    const hasVoice = voices.length === 0 || voices.some((v) => v.language.toLowerCase().startsWith(language));
-    setVoiceMissing(!hasVoice);
-    if (!hasVoice) return;
-    setSpeaking(true);
-    Speech.speak([text.name, ...text.steps, s.kvkNote].join('. '), {
-      language: lang,
-      rate: 0.9,
-      onDone: () => setSpeaking(false),
-      onStopped: () => setSpeaking(false),
-      onError: () => setSpeaking(false),
-    });
-  }
+  const crop = cropOf(scan.label);
+  const answer = (value: 'yes' | 'no') => {
+    answerScan(scan.id, value);
+    toast(s.answerSaved);
+  };
 
   return (
-    <Screen>
-      {IS_TEST_MODEL ? <TestBuildBanner text={s.testBuild} /> : null}
-      <Card tone={entry.healthy ? 'plain' : 'danger'}>
-        <Heading>{text.name}</Heading>
-        <Body muted>{other.name}</Body>
-        <Text style={[styles.confidence, { color: c.text }]}>
-          {s.confidence}: {s.levels[level]} ({percent}%)
-        </Text>
-      </Card>
-
-      {!advice.review.reviewed ? (
-        <Card tone="warn">
-          <Body>{s.notReviewed}</Body>
-        </Card>
-      ) : (
-        <Body muted>{s.reviewedBy(advice.review.reviewer)}</Body>
-      )}
-
-      <Heading>{s.whatToDo}</Heading>
-      <View style={{ gap: 10 }}>
-        {text.steps.map((step, i) => (
-          <View key={i} style={styles.step}>
-            <Text style={[styles.stepNumber, { color: c.primary }]}>{i + 1}.</Text>
-            <Text style={[styles.stepText, { color: c.text }]}>{step}</Text>
+    <SafeAreaView edges={['bottom', 'left', 'right']} style={{ flex: 1, backgroundColor: c.bg }}>
+      <ScrollView>
+        {IS_TEST_MODEL ? (
+          <View style={{ padding: 16 }}>
+            <TestBuildBanner text={s.testBuild} />
           </View>
-        ))}
+        ) : null}
+        <ConditionDetail
+          label={scan.label}
+          entry={entry}
+          caption={s.photoNotKept}
+          facts={
+            <InfoGrid
+              items={[
+                { label: s.confidence, value: `${s.levels[level]} · ${Math.round(scan.confidence * 100)}%`, tone: level === 'high' ? 'good' : undefined },
+                { label: s.cropLabel, value: crop ? s.crops[crop] : '-' },
+                { label: s.checkedAt, value: new Date(scan.createdAt).toLocaleString(locale, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) },
+                { label: s.modelLabel, value: scan.modelVersion },
+              ]}
+            />
+          }
+          extra={
+            <>
+              {scan.alternatives && scan.alternatives.length > 0 ? (
+                <View style={{ gap: 6 }}>
+                  <Kicker tone="muted">{s.otherPossibilities}</Kicker>
+                  {scan.alternatives.map((alt) => (
+                    <Meta key={alt.label}>
+                      {advice.classes[alt.label]?.[language].name ?? alt.label} {'·'} {Math.round(alt.confidence * 100)}%
+                    </Meta>
+                  ))}
+                </View>
+              ) : null}
+              <Card>
+                <Body>{s.wasCorrect}</Body>
+                {scan.answer ? (
+                  <Meta tone="good">{s.thanks}</Meta>
+                ) : (
+                  <ChipRow>
+                    <Chip label={s.yes} onPress={() => answer('yes')} />
+                    <Chip label={s.no} onPress={() => answer('no')} />
+                  </ChipRow>
+                )}
+              </Card>
+            </>
+          }
+        />
+      </ScrollView>
+      <View style={{ paddingHorizontal: 20, paddingVertical: 12, borderTopWidth: 1, borderTopColor: c.border, flexDirection: 'row' }}>
+        <ListenFooter
+          entry={entry}
+          secondary={<IconButton icon="camera-outline" label={s.checkAnother} onPress={() => router.replace({ pathname: '/camera', params: { crop: scan.chosenCrop ?? crop ?? '' } })} />}
+        />
       </View>
-      <Body muted>{s.kvkNote}</Body>
-
-      <Button label={speaking ? s.stopListening : s.listen} icon={speaking ? 'stop' : 'volume-high'} variant="secondary" onPress={listen} />
-      {voiceMissing ? <Body muted>{s.noHindiVoice}</Body> : null}
-
-      <Card>
-        <Body>{s.wasCorrect}</Body>
-        {scan.answer ? (
-          <Body muted>{s.thanks}</Body>
-        ) : (
-          <View style={styles.row}>
-            <Button label={s.yes} icon="checkmark" onPress={() => answerScan(scan.id, 'yes')} style={styles.half} />
-            <Button label={s.no} icon="close" variant="secondary" onPress={() => answerScan(scan.id, 'no')} style={styles.half} />
-          </View>
-        )}
-      </Card>
-
-      <Button label={s.tryAgain} icon="camera" variant="secondary" onPress={() => router.replace('/camera')} />
-      <Button label={s.goHome} icon="home" variant="secondary" onPress={() => router.dismissTo('/')} />
-    </Screen>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  confidence: { fontSize: FONT.body, fontWeight: '600', marginTop: 4 },
-  step: { flexDirection: 'row', gap: 8 },
-  stepNumber: { fontSize: FONT.body, fontWeight: '700', minWidth: 24, lineHeight: 27 },
-  stepText: { fontSize: FONT.body, lineHeight: 27, flex: 1 },
-  row: { flexDirection: 'row', gap: 12 },
-  half: { flex: 1 },
-});
