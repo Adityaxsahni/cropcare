@@ -18,8 +18,8 @@ CropCare is a tool for farmers, not a marketing product. It should look like a c
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `bg` | `#F7F6F2` | `#141613` | Page background |
-| `surface` | `#FFFFFF` | `#1D201B` | Cards, panels |
+| `bg` | `#FFFFFF` | `#141613` | Page background. White, not cream: the app is read outdoors in bright sun, where white gives the most contrast |
+| `surface` | `#F4F5F1` | `#1D201B` | Cards, panels |
 | `text` | `#1C1F1A` | `#ECEDE8` | Body text |
 | `muted` | `#5A6155` | `#A6AD9F` | Secondary text |
 | `primary` | `#2F6B2F` | `#7FBF6E` | Main buttons, links (leaf green) |
@@ -27,6 +27,7 @@ CropCare is a tool for farmers, not a marketing product. It should look like a c
 | `warn` | `#9A5B00` | `#E0A040` | Unsure state, medium confidence |
 | `danger` | `#A3271F` | `#EF8A80` | Disease found |
 | `border` | `#D9D8CF` | `#33372F` | Dividers, outlines |
+| `visited` | `#6B4F1D` | `#D2B074` | Visited links on the website |
 
 All text and background pairs meet WCAG AA contrast (4.5:1 for body text).
 

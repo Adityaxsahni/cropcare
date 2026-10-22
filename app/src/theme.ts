@@ -2,8 +2,8 @@ import { useColorScheme } from 'react-native';
 
 /** Tokens from docs/DESIGN.md. */
 const light = {
-  bg: '#F7F6F2',
-  surface: '#FFFFFF',
+  bg: '#FFFFFF',
+  surface: '#F4F5F1',
   text: '#1C1F1A',
   muted: '#5A6155',
   primary: '#2F6B2F',
