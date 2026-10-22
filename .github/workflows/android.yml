@@ -129,9 +129,15 @@ jobs:
             grep -E "^package:|[Ss]dkVersion|^native-code|^uses-permission" badging.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          for v in "v1 scheme (JAR signing)" "v2 scheme (APK Signature Scheme v2)" "v3 scheme (APK Signature Scheme v3)"; do
+          for v in "v2 scheme (APK Signature Scheme v2)" "v3 scheme (APK Signature Scheme v3)"; do
             grep -qF "Verified using $v: true" apksigner.txt || { echo "::error::APK is not signed with $v"; exit 1; }
           done
+          # apksigner only checks v1 for Android versions that need it, so ask as Android 6 would,
+          # and make sure the JAR signature files are really in the APK.
+          "$tools/apksigner" verify --min-sdk-version 23 --verbose "$apk" > apksigner-v1.txt 2>&1 || { cat apksigner-v1.txt; exit 1; }
+          grep -qF "Verified using v1 scheme (JAR signing): true" apksigner-v1.txt || { echo "::error::APK is not signed with v1 (JAR)"; exit 1; }
+          unzip -l "$apk" | grep -qE "META-INF/[^/]+\.SF$" || { echo "::error::APK has no META-INF signature file"; exit 1; }
+          echo "v1 (JAR) signature: verified as Android 6 would check it" >> "$GITHUB_STEP_SUMMARY"
           "$tools/zipalign" -c -P 16 4 "$apk" || { echo "::error::APK is not aligned"; exit 1; }
           grep -q "^package: name='com.cropcare.app'" badging.txt
 
