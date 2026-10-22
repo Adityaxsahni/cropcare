@@ -1,0 +1,67 @@
+name: Website
+
+# Publishes site/ to GitHub Pages, but only when the launch gate passes.
+# Until site/CNAME holds a custom domain, the site is served at
+# https://<owner>.github.io/<repo>/ and the gate treats the missing domain as a
+# warning (--allow-no-domain); every other rule still blocks the deploy.
+# One-time setup: Settings > Pages > Build and deployment > Source: GitHub Actions.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "scripts/check_launch.py"
+      - "app/src/i18n.ts"
+      - "app/assets/advice.json"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Launch gate
+        run: |
+          if [ -f site/CNAME ]; then python scripts/check_launch.py; else python scripts/check_launch.py --allow-no-domain; fi
+
+      - name: Prepare the site
+        run: |
+          mkdir _site
+          cp -r site/. _site/
+          if [ ! -f site/CNAME ]; then
+            # Project pages live under /<repo>/, so root-relative links in 404.html need that prefix.
+            prefix="/${GITHUB_REPOSITORY#*/}"
+            sed -i -e "s#href=\"/#href=\"$prefix/#g" -e "s#src=\"/#src=\"$prefix/#g" _site/404.html
+          fi
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

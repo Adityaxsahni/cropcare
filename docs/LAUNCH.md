@@ -3,10 +3,10 @@
 The website does not launch until `python scripts/check_launch.py` passes. It checks the automatic items below; the rest are manual.
 
 ## Checked by the script
-- [ ] Custom domain connected, and written in `site/CNAME`
+- [ ] Custom domain connected, and written in `site/CNAME` (until then the site is a preview at adityaxsahni.github.io/cropcare; the deploy runs the gate with `--allow-no-domain`)
 - [x] Favicon on every page (`favicon.ico`, `favicon.svg`, `apple-touch-icon.png`)
 - [x] Privacy policy page exists and every page links to it
-- [ ] Privacy policy contact email filled in (replace the `LAUNCH-TODO` link in `site/privacy.html`)
+- [x] Privacy policy contact email filled in (adityacsc99@gmail.com)
 - [x] No "made with AI" or similar tags
 - [x] No em dashes, emoji, gradients, pill-shaped buttons, scroll or cursor animation, third-party scripts or fonts
 

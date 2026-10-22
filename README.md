@@ -70,4 +70,14 @@ python scripts/check_launch.py   # the launch gate, see docs/LAUNCH.md
 - **Getting Colab results into the repo:** the notebook's last cell downloads `cropcare_results.zip`. Then run `python scripts/import_results.py cropcare_results.zip`. It installs the model in the app, copies the data card and rewrites `results.md`, keeping values typed in by hand.
 - **Field photos:** sort them into one folder per label and run `python scripts/make_field_zip.py my_photos --labelled-by "Name, KVK"` to get `field.zip` for Google Drive.
 
+## Hosting
+
+| Part | Where | How |
+|---|---|---|
+| Website | https://adityaxsahni.github.io/cropcare/ (custom domain later) | [.github/workflows/pages.yml](.github/workflows/pages.yml) publishes `site/` on every push, only when the launch gate passes. One-time: Settings > Pages > Source: GitHub Actions. |
+| Backend | Render, free plan | [Deploy to Render](https://render.com/deploy?repo=https://github.com/Adityaxsahni/cropcare) reads [render.yaml](render.yaml): the API plus a free Postgres. Render deletes free databases after 30 days, so move `DATABASE_URL` to a free database that does not expire (for example Neon) before then. |
+| Android APK | GitHub Actions artifacts; GitHub Releases for tagged versions | [.github/workflows/android.yml](.github/workflows/android.yml). A release needs the real model committed in `app/assets/model/`. |
+
+After the backend is up, set the repository variables `EXPO_PUBLIC_API_URL` (the Render URL) and `EXPO_PUBLIC_PRIVACY_URL` (`https://adityaxsahni.github.io/cropcare/privacy.html`) under Settings > Secrets and variables > Actions > Variables, so the next APK build uploads and links correctly.
+
 MIT License, see [LICENSE](LICENSE).

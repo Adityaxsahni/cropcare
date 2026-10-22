@@ -1,4 +1,5 @@
 import json
+import os
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -6,6 +7,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from app import db
 from app.main import create_app
 from app.schemas import LABELS
 
@@ -14,7 +16,13 @@ ROOT = Path(__file__).resolve().parents[2]
 
 @pytest.fixture
 def client(tmp_path):
-    app = create_app(f"sqlite:///{tmp_path / 'test.db'}", admin_token="secret-token", rate_limit=1000)
+    # CI also runs these tests against a real Postgres (TEST_DATABASE_URL), the production database.
+    url = os.environ.get("TEST_DATABASE_URL") or f"sqlite:///{tmp_path / 'test.db'}"
+    if url.startswith("postgres"):
+        engine = db.make_engine(url)
+        db.metadata.drop_all(engine)
+        engine.dispose()
+    app = create_app(url, admin_token="secret-token", rate_limit=1000)
     return TestClient(app)
 
 

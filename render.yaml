@@ -1,11 +1,23 @@
 # Render blueprint for the CropCare backend.
-# Render's free web services have no persistent disk, so SQLite would lose
-# every scan on restart. Set DATABASE_URL to a Postgres database
-# (Render Postgres, Neon or Supabase all have free tiers).
+# Deploy: https://render.com/deploy?repo=https://github.com/Adityaxsahni/cropcare
+#
+# Free tier, as Render documents it (checked 2026-10-22):
+# - the web service sleeps after 15 minutes without traffic and wakes on the next
+#   request; the app keeps unsent results and retries, so nothing is lost
+# - a free Render Postgres database is deleted 30 days after it is created.
+#   Before then, create a free database that does not expire (for example Neon),
+#   and replace DATABASE_URL on the service with its connection string.
+# SQLite is not used here: free web services have no persistent disk.
+
+databases:
+  - name: cropcare-db
+    plan: free
+
 services:
   - type: web
     name: cropcare-api
     runtime: python
+    plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:create_app --factory --host 0.0.0.0 --port $PORT
@@ -14,7 +26,9 @@ services:
       - key: PYTHON_VERSION
         value: "3.12.7"
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: cropcare-db
+          property: connectionString
       - key: ADMIN_TOKEN
         generateValue: true
       # Render puts one proxy in front of the service; trust only the address it appends.

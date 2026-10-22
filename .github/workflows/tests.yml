@@ -33,6 +33,31 @@ jobs:
       - run: python -m pytest -q
         working-directory: backend
 
+  backend-postgres:
+    # Same API tests against Postgres, the database used in production.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: cropcare
+          POSTGRES_PASSWORD: cropcare
+          POSTGRES_DB: cropcare
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U cropcare" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://cropcare:cropcare@localhost:5432/cropcare
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+        working-directory: backend
+      - run: python -m pytest -q
+        working-directory: backend
+
   app:
     runs-on: ubuntu-latest
     defaults:
