@@ -2,7 +2,7 @@ import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { useTensorflowModel, type TensorflowModel } from 'react-native-fast-tflite';
 
 import rawMeta from '../assets/model/model_meta.json';
-import { checkModelMatchesMeta, parseModelMeta, type ModelMeta } from './lib/model';
+import { checkModelMatchesMeta, isTestModel, parseModelMeta, type ModelMeta } from './lib/model';
 
 type ModelState =
   | { state: 'loading' }
@@ -10,6 +10,9 @@ type ModelState =
   | { state: 'ready'; model: TensorflowModel; meta: ModelMeta };
 
 const Ctx = createContext<ModelState>({ state: 'loading' });
+
+/** True when the bundled model is an untrained stand-in: the app then warns on every result. */
+export const IS_TEST_MODEL = isTestModel(String((rawMeta as { version?: unknown }).version ?? ''));
 
 // fast-tflite loads bundled models by asset id, which only require() provides.
 // eslint-disable-next-line @typescript-eslint/no-require-imports

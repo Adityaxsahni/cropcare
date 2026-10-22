@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { View } from 'react-native';
 
-import { Body, Button, Card, Heading, Loading, Screen } from '../components/ui';
+import { Body, Button, Card, Heading, Loading, Screen, TestBuildBanner } from '../components/ui';
+import { IS_TEST_MODEL } from '../model';
 import { useApp } from '../state';
 
 export default function Home() {
@@ -10,6 +11,7 @@ export default function Home() {
 
   return (
     <Screen>
+      {IS_TEST_MODEL ? <TestBuildBanner text={s.testBuild} /> : null}
       <Heading>{s.appName}</Heading>
       <Body muted>{s.tagline}</Body>
 

@@ -1,0 +1,108 @@
+name: Android APK
+
+# Builds an installable APK in the cloud, no Expo account needed.
+# - With a real model committed in app/assets/model/, the APK is named after its version.
+# - Without one, it uses the UNTRAINED stand-in (ml/scripts/make_standin_model.py) so the build itself
+#   can be checked. That APK is named "untrained-test-build" and the app shows a red warning.
+# - Pushing a tag like v1.0.0 attaches the APK to a GitHub Release, but only with a real model.
+# Release builds are signed with the debug key: fine for installing on pilot phones, not for the Play Store.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ["v*"]
+    paths:
+      - "app/**"
+      - "ml/class_map.json"
+      - ".github/workflows/android.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CI: "1"
+      # Optional repository variables (Settings > Secrets and variables > Actions > Variables).
+      EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+      EXPO_PUBLIC_PRIVACY_URL: ${{ vars.EXPO_PUBLIC_PRIVACY_URL }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Model
+        id: model
+        run: |
+          if [ -f app/assets/model/cropcare.tflite ] && [ -f app/assets/model/model_meta.json ]; then
+            version=$(python -c "import json; print(json.load(open('app/assets/model/model_meta.json'))['version'])")
+          else
+            pip install -q "tensorflow-cpu>=2.16,<2.21" || pip install -q "tensorflow>=2.16,<2.21"
+            (cd ml && python scripts/make_standin_model.py --out ../app/assets/model)
+            version=0.0.0-standin
+          fi
+          case "$version" in
+            0.0.0*) kind=untrained-test-build ;;
+            *) kind="model-$version" ;;
+          esac
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "kind=$kind" >> "$GITHUB_OUTPUT"
+          echo "Model version: $version ($kind)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Refuse to release an untrained model
+        if: startsWith(github.ref, 'refs/tags/v') && startsWith(steps.model.outputs.version, '0.0.0')
+        run: |
+          echo "::error::Tag ${GITHUB_REF_NAME} has no trained model in app/assets/model. Commit the real model first."
+          exit 1
+
+      - run: npm ci
+        working-directory: app
+
+      - name: Generate the Android project
+        run: npx expo prebuild --platform android --no-install
+        working-directory: app
+
+      - name: Build release APK
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=armeabi-v7a,arm64-v8a
+        working-directory: app/android
+
+      - name: Name the APK
+        id: apk
+        run: |
+          name="cropcare-${{ steps.model.outputs.kind }}.apk"
+          cp app/android/app/build/outputs/apk/release/app-release.apk "$name"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "APK: $name ($(du -h "$name" | cut -f1))" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.apk.outputs.name }}
+          path: ${{ steps.apk.outputs.name }}
+          retention-days: ${{ startsWith(steps.model.outputs.version, '0.0.0') && 3 || 30 }}
+
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: ${{ steps.apk.outputs.name }}
+          generate_release_notes: true

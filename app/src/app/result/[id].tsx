@@ -3,7 +3,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Body, Button, Card, Heading, Screen } from '../../components/ui';
+import { Body, Button, Card, Heading, Screen, TestBuildBanner } from '../../components/ui';
+import { IS_TEST_MODEL } from '../../model';
 import { confidenceLevel } from '../../lib/postprocess';
 import { useApp } from '../../state';
 import { FONT, useColors } from '../../theme';
@@ -59,6 +60,7 @@ export default function Result() {
 
   return (
     <Screen>
+      {IS_TEST_MODEL ? <TestBuildBanner text={s.testBuild} /> : null}
       <Card tone={entry.healthy ? 'plain' : 'danger'}>
         <Heading>{text.name}</Heading>
         <Body muted>{other.name}</Body>

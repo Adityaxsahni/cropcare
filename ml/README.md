@@ -31,6 +31,8 @@ PlantVillage: the Kaggle copy `abdallahalidev/plantvillage-dataset` has `color/`
 
 Field photo labels must be one of the 14 names in `class_map.json`, and `labelled_by` must say who identified the disease.
 
+The easy way to make `field.zip`: put the photos in one folder per label (folder names exactly as in `class_map.json`), then run `python ../scripts/make_field_zip.py my_photos --labelled-by "Name, KVK" --place "District"`. It checks the folder names and warns when healthy potato or healthy maize has fewer than 20 photos.
+
 ```bash
 python scripts/prepare_data.py          # writes ../data/manifest.csv; stops on any unknown class folder
 python scripts/verify_images.py         # finds files TensorFlow cannot decode (add --drop to remove them)

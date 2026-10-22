@@ -70,6 +70,15 @@ export function Card({ children, tone = 'plain' }: { children: ReactNode; tone?:
   return <View style={[styles.card, { backgroundColor: c.surface, borderColor, borderLeftWidth: tone === 'plain' ? 1 : 5 }]}>{children}</View>;
 }
 
+export function TestBuildBanner({ text }: { text: string }) {
+  const c = useColors();
+  return (
+    <View accessibilityRole="alert" style={[styles.card, { backgroundColor: c.surface, borderColor: c.danger, borderLeftWidth: 5 }]}>
+      <Text style={[styles.text, { color: c.danger, fontWeight: '700' }]}>{text}</Text>
+    </View>
+  );
+}
+
 export function Loading({ label }: { label: string }) {
   const c = useColors();
   return (

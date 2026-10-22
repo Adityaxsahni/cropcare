@@ -2,7 +2,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 
 import { isCompleteAdvice, pickAdvice, fetchNewerAdvice, type Advice } from './advice';
 import { addScan, averageInferenceMs, HISTORY_LIMIT, setAnswer, type Scan } from './history';
-import { checkModelMatchesMeta, parseModelMeta } from './model';
+import { checkModelMatchesMeta, isTestModel, parseModelMeta } from './model';
 import { confidenceLevel, decide, readProbabilities } from './postprocess';
 import { guideCrop, toModelInput, toRgb } from './preprocess';
 import { enqueue, flush, hourOf, toPending, type PendingScan } from './queue';
@@ -38,6 +38,10 @@ describe('model meta', () => {
   });
   it('rejects quantized tensors without a scale', () => {
     expect(() => parseModelMeta({ ...META, input: { ...META.input, scale: 0 } })).toThrow('scale');
+  });
+  it('recognises untrained stand-in models', () => {
+    expect(isTestModel('0.0.0-standin')).toBe(true);
+    expect(isTestModel('1.0.0')).toBe(false);
   });
   it('checks the loaded model against the metadata', () => {
     const meta = parseModelMeta(META);

@@ -52,6 +52,11 @@ export function parseModelMeta(raw: unknown): ModelMeta {
   return { version: m.version, variant: String(m.variant ?? ''), labels: m.labels, image_size: m.image_size, threshold: m.threshold, input, output };
 }
 
+/** Untrained stand-in models (ml/scripts/make_standin_model.py) use versions starting with 0.0.0. */
+export function isTestModel(version: string): boolean {
+  return version.startsWith('0.0.0');
+}
+
 /** The loaded .tflite must agree with its metadata, or results would be silently wrong. */
 export function checkModelMatchesMeta(
   modelInputs: { dataType: string; shape: number[] }[],

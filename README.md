@@ -63,6 +63,11 @@ python scripts/check_launch.py   # the launch gate, see docs/LAUNCH.md
 - Treatment advice is a draft until an agriculture expert reviews it. The app shows a warning until then.
 - One disease per leaf. No rice or wheat yet.
 
-## License
+## Builds and license
 
-Not chosen yet.
+- **Tests** ([.github/workflows/tests.yml](.github/workflows/tests.yml)) run the ML, backend and app suites on every push. The launch gate runs too, but only as information until the domain and privacy contact exist.
+- **Android APK** ([.github/workflows/android.yml](.github/workflows/android.yml)) builds an installable APK in GitHub's cloud, with no Expo account needed. Download it from the run's Artifacts. Until a trained model is committed, the APK contains an untrained stand-in, is named `untrained-test-build` and shows a red warning in the app. Pushing a tag such as `v1.0.0` attaches the APK to a GitHub Release, and the workflow refuses to do this with the stand-in.
+- **Getting Colab results into the repo:** the notebook's last cell downloads `cropcare_results.zip`. Then run `python scripts/import_results.py cropcare_results.zip`. It installs the model in the app, copies the data card and rewrites `results.md`, keeping values typed in by hand.
+- **Field photos:** sort them into one folder per label and run `python scripts/make_field_zip.py my_photos --labelled-by "Name, KVK"` to get `field.zip` for Google Drive.
+
+MIT License, see [LICENSE](LICENSE).

@@ -55,6 +55,7 @@ const en = {
   adviceDraft: 'Draft, not yet checked by an expert',
   speed: (ms: number, n: number) => `Average check time: ${Math.round(ms)} ms (last ${n})`,
   privacyPolicy: 'Full privacy policy',
+  testBuild: 'Test build: the disease model in this app is not trained. Its answers mean nothing. Do not use it on a farm.',
 };
 
 type Strings = typeof en;
@@ -113,6 +114,7 @@ const hi: Strings = {
   adviceDraft: 'मसौदा, अभी विशेषज्ञ ने नहीं जाँचा',
   speed: (ms: number, n: number) => `औसत जाँच समय: ${Math.round(ms)} मि.से. (पिछली ${n})`,
   privacyPolicy: 'पूरी गोपनीयता नीति',
+  testBuild: 'टेस्ट बिल्ड: इस ऐप का रोग पहचान मॉडल प्रशिक्षित नहीं है। इसके जवाब का कोई मतलब नहीं है। इसे खेत में इस्तेमाल न करें।',
 };
 
 export const strings: Record<Language, Strings> = { en, hi };
